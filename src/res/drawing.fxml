@@ -1,0 +1,43 @@
+<?import java.net.URL?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Button?>
+<?import javafx.geometry.Insets?>
+<BorderPane
+    fx:id="root"
+    fx:controller="grafos.ui.DrawingController"
+    xmlns:fx="http://javafx.com/fxml"
+    styleClass="root">
+    <padding>
+        <Insets left="10" top="10" right="10" bottom="10"/>
+    </padding>
+
+    <center>
+    </center>
+
+    <bottom>
+        <HBox
+            alignment="CENTER"
+            spacing="15">
+            <padding>
+                <Insets top="10"/>
+            </padding>
+            <Button
+                text="Criar Grafo"
+                prefWidth="150"
+                onAction="#handleCreateButtonAction"/>
+            <Button
+                text="Inserir Arco"
+                prefWidth="150"
+                onAction="#handleInsertButtonAction"/>
+            <Button
+                text="Remover Arco"
+                prefWidth="150"
+                onAction="#handleRemoveButtonAction"/>
+        </HBox>
+    </bottom>
+
+    <stylesheets>
+        <URL value="@style.css"/>
+    </stylesheets>
+</BorderPane>

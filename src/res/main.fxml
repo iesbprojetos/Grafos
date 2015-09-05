@@ -1,0 +1,75 @@
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.control.Button?>
+<GridPane
+    fx:controller="grafos.ui.MainController"
+    xmlns:fx="http://javafx.com/fxml"
+    alignment="CENTER"
+    vgap="10"
+    hgap="10"
+    styleClass="root">
+    <!--<gridLinesVisible>true</gridLinesVisible>-->
+    <padding>
+        <Insets left="10" top="10" right="10" bottom="10"/>
+    </padding>
+
+    <fx:define>
+        <ToggleGroup fx:id="graphType"/>
+        <ToggleGroup fx:id="algorithmType"/>
+    </fx:define>
+
+    <Text
+        id="welcome-text"
+        text="Welcome"
+        GridPane.columnIndex="0"
+        GridPane.rowIndex="0"
+        GridPane.columnSpan="2"/>
+    <Label
+        text="Tipo de Grafos:"
+        GridPane.columnIndex="0"
+        GridPane.rowIndex="1"/>
+
+    <RadioButton
+        text="Grafo"
+        toggleGroup="$graphType"
+        selected="true"
+        GridPane.columnIndex="1"
+        GridPane.rowIndex="1"/>
+    <RadioButton
+        text="Digrafo"
+        toggleGroup="$graphType"
+        GridPane.columnIndex="1"
+        GridPane.rowIndex="2"/>
+    <Label
+        text="Algoritmo:"
+        GridPane.columnIndex="0"
+        GridPane.rowIndex="3"/>
+    <RadioButton
+        text="Matriz de Adjacência"
+        toggleGroup="$algorithmType"
+        selected="true"
+        GridPane.columnIndex="1"
+        GridPane.rowIndex="3"/>
+    <RadioButton
+        text="Vetor de Adjacência"
+        toggleGroup="$algorithmType"
+        GridPane.columnIndex="1"
+        GridPane.rowIndex="4"/>
+    <Button
+        text="Iniciar"
+        onAction="#handleStartButtonAction"
+        GridPane.columnIndex="0"
+        GridPane.rowIndex="6"
+        GridPane.columnSpan="2"
+        GridPane.halignment="CENTER"/>
+
+    <stylesheets>
+        <URL value="@style.css"/>
+    </stylesheets>
+
+</GridPane>
