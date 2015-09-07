@@ -33,9 +33,9 @@ public class MainController {
 
             int algoTypeCode = -1;
 
-            if ("Matriz de Adjacência".equals(selectedAlgorithm.getText())) {
+            if (Constants.ALGO_MATRIX_NAME.equals(selectedAlgorithm.getText())) {
                 algoTypeCode = Constants.ALGO_MATRIX;
-            } else if ("Vetor de Adjacência".equals(selectedAlgorithm.getText())) {
+            } else if (Constants.ALGO_LIST_NAME.equals(selectedAlgorithm.getText())) {
                 algoTypeCode = Constants.ALGO_LIST;
             }
 
@@ -48,7 +48,7 @@ public class MainController {
 
             Stage drawingStage = new Stage();
             drawingStage.setTitle(selectedGraphType.getText() + " - " + selectedAlgorithm.getText());
-            drawingStage.setScene(new Scene(root, 500, 500));
+            drawingStage.setScene(new Scene(root, 800, 500));
             drawingStage.show();
 
             // close main window

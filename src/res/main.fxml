@@ -56,7 +56,7 @@
         GridPane.columnIndex="1"
         GridPane.rowIndex="3"/>
     <RadioButton
-        text="Vetor de Adjacência"
+        text="Lista de Adjacência"
         toggleGroup="$algorithmType"
         GridPane.columnIndex="1"
         GridPane.rowIndex="4"/>

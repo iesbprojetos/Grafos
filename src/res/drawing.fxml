@@ -3,6 +3,10 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.Button?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
 <BorderPane
     fx:id="root"
     fx:controller="grafos.ui.DrawingController"
@@ -15,26 +19,101 @@
     <center>
     </center>
 
-    <bottom>
-        <HBox
+    <right>
+        <VBox
             alignment="CENTER"
             spacing="15">
             <padding>
-                <Insets top="10"/>
+                <Insets left="10" top="10" right="10" bottom="10"/>
             </padding>
-            <Button
-                text="Criar Grafo"
-                prefWidth="150"
-                onAction="#handleCreateButtonAction"/>
-            <Button
-                text="Inserir Arco"
-                prefWidth="150"
-                onAction="#handleInsertButtonAction"/>
-            <Button
-                text="Remover Arco"
-                prefWidth="150"
-                onAction="#handleRemoveButtonAction"/>
-        </HBox>
+            <TableView
+                fx:id="tableView"
+                id="depth-table">
+                    <columns>
+                        <TableColumn
+                            text="Vértice"
+                            prefWidth="50">
+                            <cellValueFactory><PropertyValueFactory property="vertex"/></cellValueFactory>
+                        </TableColumn>
+                        <TableColumn
+                            text="Label"
+                            prefWidth="50">
+                            <cellValueFactory><PropertyValueFactory property="label"/></cellValueFactory>
+                        </TableColumn>
+                        <TableColumn
+                            text="Parent"
+                            prefWidth="50">
+                            <cellValueFactory><PropertyValueFactory property="parent"/></cellValueFactory>
+                        </TableColumn>
+                        <TableColumn
+                            text="Tempo">
+                            <columns>
+                                <TableColumn
+                                    text="D"
+                                    prefWidth="50">
+                                    <cellValueFactory><PropertyValueFactory property="timeD"/></cellValueFactory>
+                                </TableColumn>
+                                <TableColumn
+                                    text="F"
+                                    prefWidth="50">
+                                    <cellValueFactory><PropertyValueFactory property="timeF"/></cellValueFactory>
+                                </TableColumn>
+                            </columns>
+                        </TableColumn>
+                        <TableColumn
+                            text="TS"
+                            prefWidth="50">
+                            <cellValueFactory><PropertyValueFactory property="ts"/></cellValueFactory>
+                        </TableColumn>
+                    </columns>
+            </TableView>
+        </VBox>
+    </right>
+
+    <bottom>
+        <VBox
+            alignment="CENTER"
+            spacing="10">
+            <HBox
+                alignment="CENTER"
+                spacing="15">
+                <padding>
+                    <Insets top="10"/>
+                </padding>
+                <Button
+                    fx:id="btnCreate"
+                    text="Criar Grafo"
+                    prefWidth="150"
+                    onAction="#handleCreateButtonAction"/>
+                <Button
+                    fx:id="btnAddArc"
+                    text="Inserir Arco"
+                    prefWidth="150"
+                    onAction="#handleInsertButtonAction"/>
+                <Button
+                    fx:id="btnRemoveArc"
+                    text="Remover Arco"
+                    prefWidth="150"
+                    onAction="#handleRemoveButtonAction"/>
+            </HBox>
+            <HBox
+                alignment="CENTER"
+                spacing="15">
+                <padding>
+                    <Insets top="10"/>
+                </padding>
+                <Button
+                    fx:id="btnFindPath"
+                    text="Encontrar Caminho"
+                    prefWidth="150"
+                    onAction="#handleFindPathButtonAction"/>
+                <Button
+                    fx:id="btnDepthSearch"
+                    text="Busca por Profundidade"
+                    prefWidth="150"
+                    onAction="#handleDepthSearchButtonAction"/>
+            </HBox>
+        </VBox>
     </bottom>
 
     <stylesheets>

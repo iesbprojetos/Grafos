@@ -17,6 +17,15 @@ public abstract class GraphBase {
     protected int arcs;
 
     /**
+     * Construtor
+     * @param vertices: número de vértices do grafo
+     */
+    public GraphBase(int vertices) {
+        this.vertices = vertices;
+        this.arcs = 0;
+    }
+
+    /**
      * Retorna o número de vértices do grafo
      */
     public int getVertices() {
@@ -29,4 +38,18 @@ public abstract class GraphBase {
     public int getArcs() {
         return arcs;
     }
+
+    /**
+     * Insere um arco que se inicia em V e termina em W
+     * @param v: vértice inicial
+     * @param w: vértice final
+     */
+    public abstract void insertArc(int v, int w);
+
+    /**
+     * Remove um arco que se inicia em V e termina em W
+     * @param v: vértice inicial
+     * @param w: vértice final
+     */
+    public abstract void removeArc(int v, int w);
 }
