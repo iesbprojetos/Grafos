@@ -16,6 +16,15 @@ public abstract class GraphBase {
      */
     protected int arcs;
 
+    protected int[] parent;
+    protected int time;
+    protected int[] d;
+    protected int[] f;
+    protected int[] topologicalSort;
+    protected int tsCount;
+    protected int[] label;
+    protected int countLabel;
+
     /**
      * Construtor
      * @param vertices: número de vértices do grafo
@@ -37,6 +46,26 @@ public abstract class GraphBase {
      */
     public int getArcs() {
         return arcs;
+    }
+
+    public int[] getParent() {
+        return parent;
+    }
+
+    public int[] getD() {
+        return d;
+    }
+
+    public int[] getF() {
+        return f;
+    }
+
+    public int[] getTopologicalSort() {
+        return topologicalSort;
+    }
+
+    public int[] getLabel() {
+        return label;
     }
 
     /**
