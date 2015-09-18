@@ -7,6 +7,8 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
 <BorderPane
     fx:id="root"
     fx:controller="grafos.ui.DrawingController"
@@ -21,7 +23,7 @@
 
     <right>
         <VBox
-            alignment="CENTER"
+            alignment="TOP_LEFT"
             spacing="15">
             <padding>
                 <Insets left="10" top="10" right="10" bottom="10"/>
@@ -67,6 +69,41 @@
                         </TableColumn>
                     </columns>
             </TableView>
+            <Label
+                alignment="TOP_LEFT"
+                text="Tipos de arcos:"/>
+            <HBox
+                alignment="TOP_LEFT"
+                spacing="30">
+                <VBox
+                    alignment="TOP_LEFT"
+                    spacing="10">
+                    <CheckBox
+                        id="cbTree"
+                        fx:id="cbTree"
+                        text="Árvore"
+                        selected="true"/>
+                    <CheckBox
+                        id="cbReturn"
+                        fx:id="cbReturn"
+                        text="Retorno"
+                        selected="true"/>
+                </VBox>
+                <VBox
+                    alignment="TOP_LEFT"
+                    spacing="10">
+                    <CheckBox
+                        id="cbDescendant"
+                        fx:id="cbDescendant"
+                        text="Descendente"
+                        selected="true"/>
+                    <CheckBox
+                        id="cbCross"
+                        fx:id="cbCross"
+                        text="Cruzado"
+                        selected="true"/>
+                </VBox>
+            </HBox>
         </VBox>
     </right>
 

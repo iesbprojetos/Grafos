@@ -25,7 +25,7 @@
 
     <Text
         id="welcome-text"
-        text="Welcome"
+        text="Bem-vindo"
         GridPane.columnIndex="0"
         GridPane.rowIndex="0"
         GridPane.columnSpan="2"/>
@@ -35,13 +35,13 @@
         GridPane.rowIndex="1"/>
 
     <RadioButton
-        text="Grafo"
+        text="Digrafo"
         toggleGroup="$graphType"
         selected="true"
         GridPane.columnIndex="1"
         GridPane.rowIndex="1"/>
     <RadioButton
-        text="Digrafo"
+        text="Grafo"
         toggleGroup="$graphType"
         GridPane.columnIndex="1"
         GridPane.rowIndex="2"/>

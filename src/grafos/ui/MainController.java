@@ -21,17 +21,17 @@ public class MainController {
         try {
             RadioButton selectedGraphType = (RadioButton) graphType.getSelectedToggle();
 
-            int graphTypeCode = -1;
+            int graphTypeCode = Constants.TYPE_DIGRAPH;
 
-            if ("Grafo".equals(selectedGraphType.getText())) {
-                graphTypeCode = Constants.TYPE_GRAPH;
-            } else if ("Digrafo".equals(selectedGraphType.getText())) {
+            if ("Digrafo".equals(selectedGraphType.getText())) {
                 graphTypeCode = Constants.TYPE_DIGRAPH;
+            } else if ("Grafo".equals(selectedGraphType.getText())) {
+                graphTypeCode = Constants.TYPE_GRAPH;
             }
 
             RadioButton selectedAlgorithm = (RadioButton) algorithmType.getSelectedToggle();
 
-            int algoTypeCode = -1;
+            int algoTypeCode = Constants.ALGO_MATRIX;
 
             if (Constants.ALGO_MATRIX_NAME.equals(selectedAlgorithm.getText())) {
                 algoTypeCode = Constants.ALGO_MATRIX;

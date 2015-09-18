@@ -45,3 +45,19 @@ root {
 #depth-table .table-cell {
     -fx-alignment: CENTER;
 }
+
+#cbTree {
+    -fx-text-fill: black;
+}
+
+#cbReturn {
+    -fx-text-fill: green;
+}
+
+#cbDescendant {
+    -fx-text-fill: purple;
+}
+
+#cbCross {
+    -fx-text-fill: blue;
+}

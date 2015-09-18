@@ -13,11 +13,21 @@ public final class Constants {
     public static final String ALGO_MATRIX_NAME = "Matriz de Adjacência";
     public static final String ALGO_LIST_NAME = "Lista de Adjacência";
 
+    public static final int MODE_CREATE_GRAPH = 0;
     public static final int MODE_INSERT_ARC = 1;
     public static final int MODE_REMOVE_ARC = 2;
     public static final int MODE_FIND_PATH = 3;
+    public static final int MODE_DEPTH_SEARCH = 4;
+
+    public static final int RESULT_OK = 0;
+    public static final int RESULT_INVALID_VERTEX = 1;
+    public static final int RESULT_ARC_ALREADY_EXISTS = 2;
+    public static final int RESULT_ARC_NOT_FOUND = 3;
 
     public static final String ERROR_MSG_NO_PATH = "Caminho não encontrado.";
+    public static final String ERROR_MSG_INVALID_VERTEX = "Vértices inválidos";
+    public static final String ERROR_MSG_ARC_ALREADY_EXISTS = "O arco que você tentou inserir já existe";
+    public static final String ERROR_MSG_ARC_NOT_FOUND = "O arco que você tentou remover não existe";
 
     public static final int ARC_TYPE_TEMP = 0;
     public static final int ARC_TYPE_TREE = 1;

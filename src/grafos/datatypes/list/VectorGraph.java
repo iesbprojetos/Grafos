@@ -1,21 +1,15 @@
-package grafos.datatypes.matriz;
+package grafos.datatypes.list;
 
 import static grafos.Constants.*;
 
 /**
- * Representa um Grafo usando Matriz de Adjacência
- * Created by dfcarvalho on 9/5/15.
+ * Created by dfcarvalho on 9/18/15.
  */
-public class MatrixGraph extends MatrixDigraph {
-    public MatrixGraph(int vertices) {
+public class VectorGraph extends VectorDigraph {
+    public VectorGraph(int vertices) {
         super(vertices);
     }
 
-    /**
-     * Insere um arco que se inicia em V e termina em W
-     * @param v: vértice inicial
-     * @param w: vértice final
-     */
     @Override
     public int insertArc(int v, int w) {
         // insere ida
@@ -23,23 +17,19 @@ public class MatrixGraph extends MatrixDigraph {
 
         if (result == RESULT_OK) {
             // insere volta
-            result = super.insertArc(w, v);
+            result = super.insertArc(v, w);
         }
 
         return result;
     }
 
-    /**
-     * Remove um arco que se inicia em V e termina em W
-     * @param v: vértice inicial
-     * @param w: vértice final
-     */
     @Override
     public int removeArc(int v, int w) {
         // remove ida
         int result = super.removeArc(v, w);
 
         if (result == RESULT_OK) {
+            // remove volta
             result = super.removeArc(w, v);
         }
 

@@ -1,7 +1,12 @@
 package grafos.ui;
 
 import static grafos.Constants.*;
+
+import grafos.datatypes.GraphBase;
+import grafos.datatypes.list.VectorDigraph;
+import grafos.datatypes.list.VectorGraph;
 import grafos.datatypes.matriz.MatrixDigraph;
+import grafos.datatypes.matriz.MatrixGraph;
 import javafx.animation.AnimationTimer;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -17,6 +22,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.TableView;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
@@ -30,10 +36,7 @@ import javafx.stage.StageStyle;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.util.*;
 
 /**
  * Created by dfcarvalho on 8/21/15.
@@ -64,6 +67,14 @@ public class DrawingController implements Initializable {
     private Button btnDepthSearch;
     @FXML
     private TableView<VertexTableRow> tableView;
+    @FXML
+    private CheckBox cbTree;
+    @FXML
+    private CheckBox cbReturn;
+    @FXML
+    private CheckBox cbDescendant;
+    @FXML
+    private CheckBox cbCross;
 
     private List<Button> buttons = null;
 
@@ -73,7 +84,7 @@ public class DrawingController implements Initializable {
     private int graphType;
     private int algoType;
 
-    private MatrixDigraph graph;
+    private GraphBase graph;
 
     private Integer selectedVertex;
     private Point2D tempArcStart;
@@ -91,10 +102,18 @@ public class DrawingController implements Initializable {
     public void createGraph(int v) {
         switch (algoType) {
             case ALGO_MATRIX:
-                graph = new MatrixDigraph(v);
+                if (graphType == TYPE_DIGRAPH) {
+                    graph = new MatrixDigraph(v);
+                } else if (graphType == TYPE_GRAPH) {
+                    graph = new MatrixGraph(v);
+                }
                 break;
             case ALGO_LIST:
-                // TODO:
+                if (graphType == TYPE_DIGRAPH) {
+                    graph = new VectorDigraph(v);
+                } else if (graphType == TYPE_GRAPH) {
+                    graph = new VectorGraph(v);
+                }
                 break;
         }
 
@@ -102,16 +121,78 @@ public class DrawingController implements Initializable {
     }
 
     public void insertArc(int v, int w) {
-        graph.insertArc(v, w);
+        int result = graph.insertArc(v, w);
+
+        if (result != RESULT_OK) {
+            String msg = "";
+
+            switch (result) {
+                case RESULT_INVALID_VERTEX:
+                    msg = ERROR_MSG_INVALID_VERTEX;
+                    break;
+                case RESULT_ARC_ALREADY_EXISTS:
+                    msg = ERROR_MSG_ARC_ALREADY_EXISTS;
+                    break;
+            }
+
+            try {
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/res/alert_dialog.fxml"));
+                Parent root = (Parent) fxmlLoader.load();
+
+                AlertDialogController controller = fxmlLoader.getController();
+                controller.setMessage(msg);
+
+                Scene scene = new Scene(root);
+
+                Stage dialog = new Stage(StageStyle.UTILITY);
+                dialog.initModality(Modality.WINDOW_MODAL);
+                dialog.setTitle("Alerta");
+                dialog.setScene(scene);
+                dialog.sizeToScene();
+                dialog.show();
+            } catch (IOException e) {
+                // TODO:
+            }
+        }
     }
 
     public void removeArc(int v, int w) {
-        graph.removeArc(v, w);
+        int result = graph.removeArc(v, w);
+
+        if (result != RESULT_OK) {
+            String msg = "";
+
+            switch (result) {
+                case RESULT_INVALID_VERTEX:
+                    msg = ERROR_MSG_INVALID_VERTEX;
+                    break;
+                case RESULT_ARC_NOT_FOUND:
+                    msg = ERROR_MSG_ARC_NOT_FOUND;
+                    break;
+            }
+
+            try {
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/res/alert_dialog.fxml"));
+                Parent root = (Parent) fxmlLoader.load();
+
+                AlertDialogController controller = fxmlLoader.getController();
+                controller.setMessage(msg);
+
+                Scene scene = new Scene(root);
+
+                Stage dialog = new Stage(StageStyle.UTILITY);
+                dialog.initModality(Modality.WINDOW_MODAL);
+                dialog.setTitle("Alerta");
+                dialog.setScene(scene);
+                dialog.sizeToScene();
+                dialog.show();
+            } catch (IOException e) {
+                // TODO:
+            }
+        }
     }
 
-    @FXML
-    protected void handleCreateButtonAction(ActionEvent event) {
-        Button source = (Button) event.getSource();
+    private void selectButton(Button source) {
         for (Button button : buttons) {
             if (button.equals(source)) {
                 button.getStyleClass().clear();
@@ -121,6 +202,11 @@ public class DrawingController implements Initializable {
                 button.getStyleClass().add("button");
             }
         }
+    }
+
+    @FXML
+    protected void handleCreateButtonAction(ActionEvent event) {
+        selectButton((Button)event.getSource());
 
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/res/new_graph.fxml"));
@@ -139,20 +225,13 @@ public class DrawingController implements Initializable {
         } catch (IOException e) {
             // TODO:
         }
+
+        mode = MODE_CREATE_GRAPH;
     }
 
     @FXML
     protected void handleInsertButtonAction(ActionEvent event) {
-        Button source = (Button) event.getSource();
-        for (Button button : buttons) {
-            if (button.equals(source)) {
-                button.getStyleClass().clear();
-                button.getStyleClass().add("selectedButton");
-            } else {
-                button.getStyleClass().clear();
-                button.getStyleClass().add("button");
-            }
-        }
+        selectButton((Button)event.getSource());
 
         mode = MODE_INSERT_ARC;
     }
@@ -160,16 +239,7 @@ public class DrawingController implements Initializable {
     @FXML
     protected void handleRemoveButtonAction(ActionEvent event) {
         // TODO: using mouse
-        Button source = (Button) event.getSource();
-        for (Button button : buttons) {
-            if (button.equals(source)) {
-                button.getStyleClass().clear();
-                button.getStyleClass().add("selectedButton");
-            } else {
-                button.getStyleClass().clear();
-                button.getStyleClass().add("button");
-            }
-        }
+        selectButton((Button)event.getSource());
 
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/res/edit_arc.fxml"));
@@ -187,40 +257,23 @@ public class DrawingController implements Initializable {
         } catch (IOException e) {
             // TODO:
         }
+
+        mode = MODE_REMOVE_ARC;
     }
 
     @FXML
     protected void handleFindPathButtonAction(ActionEvent event) {
-        Button source = (Button) event.getSource();
-        for (Button button : buttons) {
-            if (button.equals(source)) {
-                button.getStyleClass().clear();
-                button.getStyleClass().add("selectedButton");
-            } else {
-                button.getStyleClass().clear();
-                button.getStyleClass().add("button");
-            }
-        }
+        selectButton((Button)event.getSource());
 
         mode = MODE_FIND_PATH;
     }
 
     @FXML
     protected void handleDepthSearchButtonAction(ActionEvent event) {
-        /*
-        Button source = (Button) event.getSource();
-        for (Button button : buttons) {
-            if (button.equals(source)) {
-                button.getStyleClass().clear();
-                button.getStyleClass().add("selectedButton");
-            } else {
-                button.getStyleClass().clear();
-                button.getStyleClass().add("button");
-            }
-        }
-        */
+        selectButton((Button)event.getSource());
 
         if (graph != null) {
+
             boolean acyclic = !graph.depthSearchComplete();
             if (acyclic) {
                 // TODO: no cycle, show topological sort result
@@ -239,7 +292,7 @@ public class DrawingController implements Initializable {
                 int timeF = graph.getF() != null ? graph.getF()[v] : -1;
                 int ts = -1;
                 if (acyclic) {
-                   ts = graph.getTopologicalSort() != null ? graph.getTopologicalSort()[v] : -1;
+                    ts = graph.getTopologicalSort() != null ? graph.getTopologicalSort()[v] : -1;
                 }
 
                 VertexTableRow row = new VertexTableRow(v, label, parent, timeD, timeF, ts);
@@ -248,6 +301,8 @@ public class DrawingController implements Initializable {
 
             tableView.setItems(data);
         }
+
+        mode = MODE_DEPTH_SEARCH;
     }
 
     private void createCanvas() {
@@ -289,22 +344,38 @@ public class DrawingController implements Initializable {
 
         // draw temporary arc (mouse dragging)
         if (tempArcStart != null && tempArcEnd != null) {
-            drawArc(gc, tempArcStart, tempArcEnd, ARC_TYPE_TREE);
+            drawArc(gc, tempArcStart, tempArcEnd, ARC_TYPE_TEMP);
         }
 
         if (graph != null) {
-            int[][] adjMatrix = graph.getAdjMatrix();
+            if (algoType == ALGO_MATRIX) {
+                int[][] adjMatrix = ((MatrixDigraph) graph).getAdjMatrix();
 
-            for (int v = 0; v < graph.getVertices(); v++) {
-                // draw arcs from this vertex to all others
-                for (int w = 0; w < graph.getVertices(); w++) {
-                    if (adjMatrix[v][w] == 1) {
+                for (int v = 0; v < graph.getVertices(); v++) {
+                    // draw arcs from this vertex to all others
+                    for (int w = 0; w < graph.getVertices(); w++) {
+                        if (adjMatrix[v][w] == 1) {
+                            drawArc(gc, v, w, graph.getVertices());
+                        }
+                    }
+                    // draw vertex circle
+                    boolean isSelected = (selectedVertex != null && v == selectedVertex);
+                    drawVertex(gc, v, graph.getVertices(), isSelected);
+                }
+            } else if (algoType == ALGO_LIST) {
+                // TODO:
+                List<LinkedList<Integer>> list = ((VectorDigraph) graph).getAdjVector();
+                for (int v = 0; v < graph.getVertices(); v++) {
+                    LinkedList<Integer> adjList = list.get(v);
+
+                    for (Integer w : adjList) {
                         drawArc(gc, v, w, graph.getVertices());
                     }
+
+                    // draw vertex circle
+                    boolean isSelected = (selectedVertex != null && v == selectedVertex);
+                    drawVertex(gc, v, graph.getVertices(), isSelected);
                 }
-                // draw vertex circle
-                boolean isSelected = (selectedVertex != null && v == selectedVertex);
-                drawVertex(gc, v, graph.getVertices(), isSelected);
             }
         }
 
@@ -338,7 +409,7 @@ public class DrawingController implements Initializable {
         Point2D start = new Point2D(startX, startY);
         Point2D end = new Point2D(endX, endY);
 
-        int arcType =  ARC_TYPE_TREE;
+        int arcType = ARC_TYPE_TREE;
         int[] parent = graph.getParent();
         int[] d = graph.getD();
         int[] f = graph.getF();
@@ -358,11 +429,11 @@ public class DrawingController implements Initializable {
 
         if (path != null) {
             int indexStart = path.indexOf(v);
-            if (indexStart >= 0 && indexStart+1 < path.size()) {
-                int nextV = path.get(indexStart+1);
+            if (indexStart >= 0 && indexStart + 1 < path.size()) {
+                int nextV = path.get(indexStart + 1);
 
                 if (nextV == w) {
-                    arcType = ARC_TYPE_TEMP;
+                    arcType = ARC_TYPE_PATH;
                 }
             }
         }
@@ -371,6 +442,7 @@ public class DrawingController implements Initializable {
     }
 
     private void drawArc(GraphicsContext gc, Point2D start, Point2D end, int arcType) {
+        boolean shouldDraw = true;
         double angle = Math.toDegrees(Math.atan2(end.getY() - start.getY(), end.getX() - start.getX()));
 
         double arrowEndX = end.getX() + DIAMETER / 2 * Math.cos(Math.toRadians(180 + angle));
@@ -378,18 +450,22 @@ public class DrawingController implements Initializable {
 
         switch (arcType) {
             case ARC_TYPE_TEMP:
-                gc.setStroke(Color.BEIGE);
+                gc.setStroke(Color.YELLOW);
                 break;
             case ARC_TYPE_TREE:
+                shouldDraw = cbTree.isSelected();
                 gc.setStroke(Color.BLACK);
                 break;
             case ARC_TYPE_DESC:
+                shouldDraw = cbDescendant.isSelected();
                 gc.setStroke(Color.PURPLE);
                 break;
             case ARC_TYPE_CRSS:
+                shouldDraw = cbCross.isSelected();
                 gc.setStroke(Color.BLUE);
                 break;
             case ARC_TYPE_RTRN:
+                shouldDraw = cbReturn.isSelected();
                 gc.setStroke(Color.GREEN);
                 break;
             case ARC_TYPE_PATH:
@@ -397,18 +473,20 @@ public class DrawingController implements Initializable {
                 break;
         }
 
-        gc.setLineWidth(3);
-        gc.strokeLine(start.getX(), start.getY(), arrowEndX, arrowEndY);
+        if (shouldDraw) {
+            gc.setLineWidth(3);
+            gc.strokeLine(start.getX(), start.getY(), arrowEndX, arrowEndY);
 
-        // arrow
-        if (graphType == TYPE_DIGRAPH) {
-            Image arrow = new Image("/res/arrow_head.png", ARROW_SIZE, ARROW_SIZE, false, true);
+            // arrow
+            if (graphType == TYPE_DIGRAPH) {
+                Image arrow = new Image("/res/arrow_head.png", ARROW_SIZE, ARROW_SIZE, false, true);
 
-            gc.translate(arrowEndX, arrowEndY);
-            gc.rotate(angle);
-            gc.drawImage(arrow, -ARROW_SIZE, -ARROW_SIZE / 2);
-            gc.rotate(-angle);
-            gc.translate(-arrowEndX, -arrowEndY);
+                gc.translate(arrowEndX, arrowEndY);
+                gc.rotate(angle);
+                gc.drawImage(arrow, -ARROW_SIZE, -ARROW_SIZE / 2);
+                gc.rotate(-angle);
+                gc.translate(-arrowEndX, -arrowEndY);
+            }
         }
     }
 
