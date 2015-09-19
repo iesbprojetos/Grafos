@@ -52,6 +52,7 @@ public class VectorDigraph extends GraphBase {
 
         // senão, insere arco
         adjVector.get(v).push(w);
+        arcs++;
         return RESULT_OK;
     }
 
@@ -74,6 +75,7 @@ public class VectorDigraph extends GraphBase {
         }
 
         // arco removido
+        arcs--;
         return RESULT_OK;
     }
 

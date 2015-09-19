@@ -70,6 +70,7 @@ public class MatrixDigraph extends GraphBase {
 
         // remove arco;
         adjMatrix[v][w] = 0;
+        arcs--;
         return RESULT_OK;
     }
 

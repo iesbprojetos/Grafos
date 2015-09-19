@@ -6,11 +6,13 @@ import java.util.List;
 
 /**
  * GraphBase - classe abstrata
- * Class base para os Grafos/Digrafos.
- * Possui todos o membros e métodos comuns a todos os tipos de grafos utilizados no programa.
- * Os métodos de busca de profundidade (depthSearchCompleteR) e de busca de caminho (findPathR)
- * precisam ser implementados pelas classes filhas, pois suas implementações dependem do algoritmo
- * utilizado para representar o grafo (matriz ou vetor de adjacência)
+ * Classe base para os Grafos/Digrafos.
+ * Possui todos o membros e métodos comuns a todos os tipos de grafos utilizados
+ * no programa.
+ * Os métodos de busca de profundidade (depthSearchCompleteR) e de busca de
+ * caminho (findPathR) precisam ser implementados pelas classes filhas,
+ * pois suas implementações dependem do algoritmo utilizado para representar
+ * o grafo (matriz ou vetor de adjacência)
  */
 public abstract class GraphBase {
     /**
@@ -73,6 +75,10 @@ public abstract class GraphBase {
      * O valor 'x' do vetor no índice 'v' indica que o vértice v foi o
      */
     protected int[] label;
+
+    /**
+     * Variável auxiliar utilizada para contar a ordem de visita dos vértices
+     */
     protected int countLabel;
 
     /**
@@ -147,7 +153,7 @@ public abstract class GraphBase {
     public abstract int removeArc(int v, int w);
 
     /**
-     * Busca
+     * Busca caminho entre dois vértices
      * @param s: vértice inicial
      * @param t: vértice final
      * @return true, se houver caminho; false, se não houver. Também seta os vetores de tempo (d e f)

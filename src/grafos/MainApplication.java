@@ -1,4 +1,4 @@
-package grafos.ui;
+package grafos;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;

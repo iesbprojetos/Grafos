@@ -15,5 +15,6 @@ hs_err_pid*
 
 .classpath
 out/
+build/
 
 workspace.xml
