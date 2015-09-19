@@ -27,7 +27,7 @@ Basta importar ou clonar o projeto
 
 ### Eclipse ###
 
-Instalar plugin e(fx)clips: http://www.eclipse.org/efxclipse/index.html 
+Instalar plugin e(fx)clipse: http://www.eclipse.org/efxclipse/index.html 
 
 ## Funcionalidades ##
 
