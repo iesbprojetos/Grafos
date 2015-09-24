@@ -17,7 +17,7 @@ public class VectorGraph extends VectorDigraph {
 
         if (result == RESULT_OK) {
             // insere volta
-            result = super.insertArc(v, w);
+            result = super.insertArc(w, v);
 
             if (result != RESULT_OK) {
                 // remove ida em caso de erro
