@@ -24,6 +24,11 @@ public class MatrixGraph extends MatrixDigraph {
         if (result == RESULT_OK) {
             // insere volta
             result = super.insertArc(w, v);
+
+            if (result != RESULT_OK) {
+                // remove ida em caso de erro
+                super.removeArc(v, w);
+            }
         }
 
         return result;
@@ -41,6 +46,11 @@ public class MatrixGraph extends MatrixDigraph {
 
         if (result == RESULT_OK) {
             result = super.removeArc(w, v);
+
+            if (result != RESULT_OK) {
+                // re-insere ida em caso de erro
+                super.insertArc(v, w);
+            }
         }
 
         return result;

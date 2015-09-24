@@ -92,8 +92,10 @@ public class VectorDigraph extends GraphBase {
         // percorre vetor de adjacência do vetor v
         LinkedList<Integer> vector = adjVector.get(v);
         for (Integer w : vector) {
-            parent[w] = v;
-            findPathR(w);
+            if (d[w] == -1) {
+                parent[w] = v;
+                findPathR(w);
+            }
         }
 
         // marca fim da visita ao vetor v
@@ -128,7 +130,7 @@ public class VectorDigraph extends GraphBase {
                     loop = true;
                 }
             } else if (f[w] == -1) {
-                // visita ao vértice w já finalizou, então existe um ciclo
+                // visita ao vértice w não finalizou, então existe um ciclo
                 loop = true;
             }
         }

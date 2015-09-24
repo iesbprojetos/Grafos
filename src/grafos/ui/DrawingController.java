@@ -410,24 +410,27 @@ public class DrawingController implements Initializable {
         Point2D end = new Point2D(endX, endY);
 
         int arcType = ARC_TYPE_TREE;
-        int[] parent = graph.getParent();
-        int[] d = graph.getD();
-        int[] f = graph.getF();
-        if (parent != null && d != null && f != null) {
-            if (d[v] < d[w] && d[w] < f[w] && f[w] < f[v]) {
-                if (parent[w] == v) {
-                    arcType = ARC_TYPE_TREE;
-                } else {
-                    arcType = ARC_TYPE_DESC;
+        if (mode == MODE_DEPTH_SEARCH) {
+            int[] parent = graph.getParent();
+            int[] d = graph.getD();
+            int[] f = graph.getF();
+            if (parent != null && d != null && f != null) {
+                if (d[v] < d[w] && d[w] < f[w] && f[w] < f[v]) {
+                    if (parent[w] == v) {
+                        arcType = ARC_TYPE_TREE;
+                    } else {
+                        arcType = ARC_TYPE_DESC;
+                    }
+                } else if (d[w] < d[v] && d[v] < f[v] && f[v] < f[w]) {
+                    arcType = ARC_TYPE_RTRN;
+                } else if (d[w] < f[w] && f[w] < d[v] && d[v] < f[v]) {
+                    arcType = ARC_TYPE_CRSS;
                 }
-            } else if (d[w] < d[v] && d[v] < f[v] && f[v] < f[w]) {
-                arcType = ARC_TYPE_RTRN;
-            } else if (d[w] < f[w] && f[w] < d[v] && d[v] < f[v]) {
-                arcType = ARC_TYPE_CRSS;
             }
         }
 
-        if (path != null) {
+
+        if (mode == MODE_FIND_PATH && path != null) {
             int indexStart = path.indexOf(v);
             if (indexStart >= 0 && indexStart + 1 < path.size()) {
                 int nextV = path.get(indexStart + 1);

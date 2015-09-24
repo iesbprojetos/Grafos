@@ -18,6 +18,11 @@ public class VectorGraph extends VectorDigraph {
         if (result == RESULT_OK) {
             // insere volta
             result = super.insertArc(v, w);
+
+            if (result != RESULT_OK) {
+                // remove ida em caso de erro
+                super.removeArc(v, w);
+            }
         }
 
         return result;
@@ -31,6 +36,11 @@ public class VectorGraph extends VectorDigraph {
         if (result == RESULT_OK) {
             // remove volta
             result = super.removeArc(w, v);
+
+            if (result != RESULT_OK) {
+                // re-insere ida em caso de erro
+                super.insertArc(v, w);
+            }
         }
 
         return result;

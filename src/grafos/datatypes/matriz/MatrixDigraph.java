@@ -134,7 +134,7 @@ public class MatrixDigraph extends GraphBase {
                         loop = true;
                     }
                 } else if (f[w] == -1) {
-                    // vértice w já foi visitado, existe ciclo
+                    // visita ao vértice w não finalizou, então existe ciclo
                     loop = true;
                 }
             }
