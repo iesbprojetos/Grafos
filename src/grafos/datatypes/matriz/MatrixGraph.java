@@ -55,4 +55,21 @@ public class MatrixGraph extends MatrixDigraph {
 
         return result;
     }
+
+    @Override
+    public void depthSearchCC() {
+        cc = new int[vertices];
+        countCC = 0;
+
+        for (int v = 0; v < vertices; v++) {
+            cc[v] = -1;
+        }
+
+        for (int v = 0; v < vertices; v++) {
+            if (cc[v] == -1) {
+                depthSearchCCR(v);
+                countCC++;
+            }
+        }
+    }
 }

@@ -91,6 +91,12 @@ public class DrawingController implements Initializable {
     private Point2D tempArcEnd;
     private List<Integer> path;
 
+    private Color[] vertexColors = new Color[]{
+            Color.DARKRED, Color.DARKGREEN, Color.DARKBLUE,
+            Color.DARKVIOLET, Color.MEDIUMSPRINGGREEN, Color.BLUE,
+            Color.BURLYWOOD, Color.MEDIUMVIOLETRED, Color.DARKORANGE
+    };
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         createCanvas();
@@ -118,6 +124,12 @@ public class DrawingController implements Initializable {
         }
 
         tableView.setItems(null);
+
+        // go to insert arc mode, if graph created
+        if (graph != null) {
+            selectButton(btnAddArc);
+            mode = MODE_INSERT_ARC;
+        }
     }
 
     public void insertArc(int v, int w) {
@@ -294,8 +306,9 @@ public class DrawingController implements Initializable {
                 if (acyclic) {
                     ts = graph.getTopologicalSort() != null ? graph.getTopologicalSort()[v] : -1;
                 }
+                int cc = graph.getCc() != null ? graph.getCc()[v] : -1;
 
-                VertexTableRow row = new VertexTableRow(v, label, parent, timeD, timeF, ts);
+                VertexTableRow row = new VertexTableRow(v, label, parent, timeD, timeF, ts, cc);
                 data.add(row);
             }
 
@@ -303,6 +316,24 @@ public class DrawingController implements Initializable {
         }
 
         mode = MODE_DEPTH_SEARCH;
+    }
+
+    private void fillTable() {
+        ObservableList<VertexTableRow> data = FXCollections.observableArrayList();
+
+        for (int v = 0; v < graph.getVertices(); v++) {
+            int parent = graph.getParent() != null ? graph.getParent()[v] : -1;
+            int label = graph.getLabel() != null ? graph.getLabel()[v] : -1;
+            int timeD = graph.getD() != null ? graph.getD()[v] : -1;
+            int timeF = graph.getF() != null ? graph.getF()[v] : -1;
+            int ts = graph.getTopologicalSort() != null ? graph.getTopologicalSort()[v] : -1;
+            int cc = graph.getCc() != null ? graph.getCc()[v] : -1;
+
+            VertexTableRow row = new VertexTableRow(v, label, parent, timeD, timeF, ts, cc);
+            data.add(row);
+        }
+
+        tableView.setItems(data);
     }
 
     private void createCanvas() {
@@ -388,11 +419,18 @@ public class DrawingController implements Initializable {
         double x = centerX - DIAMETER / scaleX / 2;
         double y = centerY - DIAMETER / scaleY / 2;
 
+        Color colorFill = Color.BLACK;
+
         if (isSelected) {
-            gc.setFill(Color.RED);
+            colorFill = Color.RED;
         } else {
-            gc.setFill(Color.GREEN);
+            int[] cc = graph.getCc();
+            if (cc != null) {
+                int componentColor = cc[v] < vertexColors.length ? cc[v] : cc[v] % vertexColors.length;
+                colorFill = vertexColors[componentColor];
+            }
         }
+        gc.setFill(colorFill);
         gc.setLineWidth(1);
         gc.fillOval(x, y, DIAMETER / scaleX, DIAMETER / scaleY);
 
@@ -531,6 +569,7 @@ public class DrawingController implements Initializable {
                     break;
                 case MODE_REMOVE_ARC:
                     // TODO:
+                    break;
                 case MODE_FIND_PATH:
                     handleFindPath(mouseEvent);
                     break;

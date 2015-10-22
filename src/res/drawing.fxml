@@ -67,6 +67,11 @@
                             prefWidth="50">
                             <cellValueFactory><PropertyValueFactory property="ts"/></cellValueFactory>
                         </TableColumn>
+                        <TableColumn
+                            text="CC"
+                            prefWidth="50">
+                            <cellValueFactory><PropertyValueFactory property="cc"/></cellValueFactory>
+                        </TableColumn>
                     </columns>
             </TableView>
             <Label

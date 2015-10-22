@@ -1,7 +1,11 @@
 package grafos.datatypes.matriz;
 
 import static grafos.Constants.*;
+
+import com.sun.deploy.util.ArrayUtil;
 import grafos.datatypes.GraphBase;
+
+import java.util.*;
 
 /**
  * Representa um Digrafo usando o algoritmo Matriz de Adjacência
@@ -81,6 +85,10 @@ public class MatrixDigraph extends GraphBase {
         return adjMatrix;
     }
 
+    protected void setAdjMatrix(int[][] adjMatrix) {
+        this.adjMatrix = adjMatrix;
+    }
+
     /**
      * Visita recursivamente v e todos os vértices adjacentes a ele
      * @param v: vértice a ser visitado
@@ -116,7 +124,6 @@ public class MatrixDigraph extends GraphBase {
         label[v] = countLabel++;
         // marca o início da visita ao vetor v
         d[v] = time++;
-
         boolean loop = false;
 
         // percorre os vértices do grafo
@@ -146,5 +153,42 @@ public class MatrixDigraph extends GraphBase {
         topologicalSort[tsCount--] = v;
 
         return loop;
+    }
+
+    @Override
+    public void depthSearchCC() {
+        MatrixDigraph tGraph = this.getTransposedGraph();
+        if (label == null) {
+            tGraph.depthSearchComplete();
+        }
+        cc = tGraph.depthSearchTransposed(f);
+    }
+
+    protected MatrixDigraph getTransposedGraph() {
+        MatrixDigraph tGraph = new MatrixDigraph(vertices);
+
+        int[][] tAdjMatrix = new int[vertices][vertices];
+
+        for (int v = 0; v < vertices; v++) {
+            for (int w = 0; w < vertices; w++) {
+                tAdjMatrix[v][w] = adjMatrix[w][v];
+            }
+        }
+
+        tGraph.setAdjMatrix(tAdjMatrix);
+
+        return tGraph;
+    }
+
+    protected void depthSearchCCR(int v) {
+        cc[v] = countCC;
+
+        for (int w = 0; w < vertices; w++) {
+            if (adjMatrix[v][w] == 1) {
+                if (cc[w] == -1) {
+                    depthSearchCCR(w);
+                }
+            }
+        }
     }
 }

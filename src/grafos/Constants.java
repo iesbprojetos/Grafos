@@ -18,6 +18,7 @@ public final class Constants {
     public static final int MODE_REMOVE_ARC = 2;
     public static final int MODE_FIND_PATH = 3;
     public static final int MODE_DEPTH_SEARCH = 4;
+    public static final int MODE_CC_SEARCH = 5;
 
     public static final int RESULT_OK = 0;
     public static final int RESULT_INVALID_VERTEX = 1;

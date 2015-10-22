@@ -26,6 +26,10 @@ public class VectorDigraph extends GraphBase {
         return adjVector;
     }
 
+    protected void setAdjVector(List<LinkedList<Integer>> adjVector) {
+        this.adjVector = adjVector;
+    }
+
     /**
      * Insere um arco que se inicia em V e termina em W
      * @param v: vértice inicial
@@ -141,5 +145,37 @@ public class VectorDigraph extends GraphBase {
         topologicalSort[tsCount--] = v;
 
         return loop;
+    }
+
+    @Override
+    public void depthSearchCC() {
+        VectorDigraph tGraph = this.getTransposedGraph();
+        cc = tGraph.depthSearchTransposed(f);
+    }
+
+    protected VectorDigraph getTransposedGraph() {
+        VectorDigraph tGraph = new VectorDigraph(vertices);
+
+        List<LinkedList<Integer>> tAdjVector = tGraph.getAdjVector();
+        for (int v = 0; v < vertices; v++) {
+            for (Integer w : adjVector.get(v)) {
+                tAdjVector.get(w).add(v);
+            }
+        }
+
+        tGraph.setAdjVector(tAdjVector);
+
+        return tGraph;
+    }
+
+    @Override
+    protected void depthSearchCCR(int v) {
+        cc[v] = countCC;
+
+        for (Integer w : adjVector.get(v)) {
+            if (cc[w] == -1) {
+                depthSearchCCR(w);
+            }
+        }
     }
 }

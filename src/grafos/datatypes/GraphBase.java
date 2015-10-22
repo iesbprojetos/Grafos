@@ -1,8 +1,6 @@
 package grafos.datatypes;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * GraphBase - classe abstrata
@@ -82,7 +80,19 @@ public abstract class GraphBase {
     protected int countLabel;
 
     /**
+     * Vetor que armazena a qual componente conexo cada vértice pertence
+     * O valor 'x' do vetor no índice 'v' indica que o vértice v pertence ao componente x
+     */
+    protected int[] cc;
+
+    /**
+     * Variável auxiliar utilizada para contar os componentes conexos
+     */
+    protected int countCC;
+
+    /**
      * Construtor
+     *
      * @param vertices: número de vértices do grafo
      */
     public GraphBase(int vertices) {
@@ -139,7 +149,15 @@ public abstract class GraphBase {
     }
 
     /**
+     * @return Retorna o vetor de componentes conexos
+     */
+    public int[] getCc() {
+        return cc;
+    }
+
+    /**
      * Insere um arco que se inicia em V e termina em W
+     *
      * @param v: vértice inicial
      * @param w: vértice final
      */
@@ -147,6 +165,7 @@ public abstract class GraphBase {
 
     /**
      * Remove um arco que se inicia em V e termina em W
+     *
      * @param v: vértice inicial
      * @param w: vértice final
      */
@@ -154,6 +173,7 @@ public abstract class GraphBase {
 
     /**
      * Busca caminho entre dois vértices
+     *
      * @param s: vértice inicial
      * @param t: vértice final
      * @return true, se houver caminho; false, se não houver. Também seta os vetores de tempo (d e f)
@@ -184,13 +204,15 @@ public abstract class GraphBase {
 
     /**
      * Visita recursivamente v e todos os vértices adjacentes a ele
+     *
      * @param v: vértice a ser visitado
-     * Seta os vetores d, f e parent em cada visita
+     *           Seta os vetores d, f e parent em cada visita
      */
     protected abstract void findPathR(int v);
 
     /**
      * Retorna caminho entre os vértices s e t (na ordem correta)
+     *
      * @param s: vetor inicial
      * @param t: vetor final
      * @return Uma List contendo os vértices na ordem do caminho entre s e t ou null caso o caminho não exista
@@ -219,22 +241,25 @@ public abstract class GraphBase {
 
     /**
      * Faz a busca por profundidade do grafo inteiro, marcando para cada vértice:
-     *  - ordem de visita (label)
-     *  - tempo de visita (inicial e final - d e f)
-     *  - pai (parent)
-     *  - ordem topológica (se grafo não possuir ciclo)
+     * - ordem de visita (label)
+     * - tempo de visita (inicial e final - d e f)
+     * - pai (parent)
+     * - ordem topológica (se grafo não possuir ciclo)
+     *
      * @return true, se grafo possui ciclo; false, se não possui ciclo.
      */
     public boolean depthSearchComplete() {
         // inicializa todas as variáveis e vetores
         time = 0;
-        tsCount = vertices-1;
+        tsCount = vertices - 1;
         topologicalSort = new int[vertices];
         d = new int[vertices];
         f = new int[vertices];
         parent = new int[vertices];
         countLabel = 0;
         label = new int[vertices];
+        cc = new int[vertices];
+        countCC = 0;
         boolean loop = false;
 
         for (int v = 0; v < vertices; v++) {
@@ -252,16 +277,54 @@ public abstract class GraphBase {
                 if (depthSearchCompleteR(v)) {
                     loop = true;
                 }
+                countCC++;
             }
         }
+
+        depthSearchCC();
 
         return loop;
     }
 
     /**
      * Faz a busca por profundidade recursivamente do grafo inteiro partindo do vértice v
+     *
      * @param v: vértice a ser visitado
      * @return true, se houver ciclo; false, se não houver
      */
     protected abstract boolean depthSearchCompleteR(int v);
+
+    public abstract void depthSearchCC();
+
+    protected abstract void depthSearchCCR(int v);
+
+    protected int[] depthSearchTransposed(int[] normalF) {
+        // inicializa todas as variáveis e vetores
+        cc = new int[vertices];
+        countCC = 0;
+
+        for (int v = 0; v < vertices; v++) {
+            cc[v] = -1;
+        }
+
+        SortedMap<Integer, Integer> sortedMap = new TreeMap<>(Collections.reverseOrder());
+        for (int v = 0; v < vertices; v++) {
+            sortedMap.put(normalF[v], v);
+        }
+
+        // percorre todos os vértices do grafo, em ordem decrescente fo seu respectivo normalF
+        for (Map.Entry<Integer, Integer> entry : sortedMap.entrySet()) {
+            int v = entry.getValue();
+
+            // verifica se vértice v já foi visitado
+            if (cc[v] == -1) {
+                // se não foi visitado...
+                // faz a busca por profundidade partindo do vértice v
+                depthSearchCCR(v);
+                countCC++;
+            }
+        }
+
+        return cc;
+    }
 }

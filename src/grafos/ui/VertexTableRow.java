@@ -12,17 +12,19 @@ public class VertexTableRow {
     private SimpleIntegerProperty timeD;
     private SimpleIntegerProperty timeF;
     private SimpleIntegerProperty ts;
+    private SimpleIntegerProperty cc;
 
     public VertexTableRow() {
     }
 
-    public VertexTableRow(int vertex, int label, int parent, int timeD, int timeF, int ts) {
+    public VertexTableRow(int vertex, int label, int parent, int timeD, int timeF, int ts, int cc) {
         this.vertex = new SimpleIntegerProperty(vertex);
         this.label = new SimpleIntegerProperty(label);
         this.parent = new SimpleIntegerProperty(parent);
         this.timeD = new SimpleIntegerProperty(timeD);
         this.timeF = new SimpleIntegerProperty(timeF);
         this.ts = new SimpleIntegerProperty(ts);
+        this.cc = new SimpleIntegerProperty(cc);
     }
 
     public int getVertex() {
@@ -95,5 +97,17 @@ public class VertexTableRow {
 
     public void setTs(int ts) {
         this.ts.set(ts);
+    }
+
+    public int getCc() {
+        return cc.get();
+    }
+
+    public SimpleIntegerProperty ccProperty() {
+        return cc;
+    }
+
+    public void setCc(int cc) {
+        this.cc.set(cc);
     }
 }

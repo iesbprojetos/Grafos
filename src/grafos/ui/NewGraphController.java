@@ -32,7 +32,6 @@ public class NewGraphController implements Initializable {
     public void setDrawingController(DrawingController drawingController) {
         this.drawingController = drawingController;
     }
-    
 
     @FXML protected void onCreateButtonPressed(ActionEvent event) {
         String strV = textFieldVertices.getText();
