@@ -32,6 +32,7 @@ public class NewGraphController implements Initializable {
     public void setDrawingController(DrawingController drawingController) {
         this.drawingController = drawingController;
     }
+    
 
     @FXML protected void onCreateButtonPressed(ActionEvent event) {
         String strV = textFieldVertices.getText();
@@ -68,7 +69,27 @@ public class NewGraphController implements Initializable {
             Stage thisStage = (Stage) src.getScene().getWindow();
             thisStage.close();
         } catch (NumberFormatException e) {
-            // TODO: show error
+            try {
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/res/alert_dialog.fxml"));
+                Parent root = (Parent) fxmlLoader.load();
+
+                AlertDialogController controller = fxmlLoader.getController();
+                controller.setMessage("O valor do vertice deve ser numerico.");
+
+                Scene scene = new Scene(root);
+
+                Stage dialog = new Stage(StageStyle.UTILITY);
+                dialog.initModality(Modality.WINDOW_MODAL);
+                dialog.setTitle("Alerta");
+                dialog.setScene(scene);
+                dialog.sizeToScene();
+                dialog.show();
+
+                return;
+            } catch (IOException ex) {
+                // TODO:
+                e.printStackTrace();
+            }
             e.printStackTrace();
         } catch (ClassCastException e) {
             // TODO: can't recover
