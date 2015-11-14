@@ -15,6 +15,7 @@ import java.io.IOException;
 
 public class MainController {
     @FXML private ToggleGroup graphType;
+    @FXML private ToggleGroup costType;
     @FXML private ToggleGroup algorithmType;
 
     @FXML protected void handleStartButtonAction(ActionEvent event) {
@@ -27,6 +28,16 @@ public class MainController {
                 graphTypeCode = Constants.TYPE_DIGRAPH;
             } else if ("Grafo".equals(selectedGraphType.getText())) {
                 graphTypeCode = Constants.TYPE_GRAPH;
+            }
+
+            RadioButton selectedCost = (RadioButton) costType.getSelectedToggle();
+
+            int costCode = Constants.COST_NO;
+
+            if ("Sem Custo".equals(selectedCost.getText())) {
+                costCode = Constants.COST_NO;
+            } else if ("Com Custo".equals(selectedCost.getText())) {
+                costCode = Constants.COST_YES;
             }
 
             RadioButton selectedAlgorithm = (RadioButton) algorithmType.getSelectedToggle();
@@ -44,10 +55,11 @@ public class MainController {
 
             DrawingController controller = fxmlLoader.getController();
             controller.setGraphType(graphTypeCode);
+            controller.setCostType(costCode);
             controller.setAlgoType(algoTypeCode);
 
             Stage drawingStage = new Stage();
-            drawingStage.setTitle(selectedGraphType.getText() + " - " + selectedAlgorithm.getText());
+            drawingStage.setTitle(selectedGraphType.getText() + " - " + selectedAlgorithm.getText() + " - " + selectedCost.getText());
             drawingStage.setScene(new Scene(root, 800, 500));
             drawingStage.show();
 

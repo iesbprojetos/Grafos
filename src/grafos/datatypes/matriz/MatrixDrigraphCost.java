@@ -15,6 +15,9 @@ public class MatrixDrigraphCost extends MatrixDigraph {
      */
     protected int[] custo;
 
+    /**
+     * Fila de prioridades
+     */
     protected int[] pq;
     
     protected int[] ts;
@@ -35,6 +38,9 @@ public class MatrixDrigraphCost extends MatrixDigraph {
     }
 
     public void dijkstra(int s) {
+        custo = new int[vertices];
+        parent = new int[vertices];
+
         for (int v = 0; v < vertices; v++) {
             custo[v] = INF;
             parent[v] = -1;
@@ -48,7 +54,7 @@ public class MatrixDrigraphCost extends MatrixDigraph {
         while(!PQempty()) {
             int v = PQdelmin();
             for (int w = 0; w < vertices; w++) {
-                if (adjMatrix[v][w] != -1) {
+                if (adjMatrix[v][w] != 0) {
                     if (custo[w] == INF) {
                         parent[w] = v;
                         custo[w] = custo[v] + adjMatrix[v][w];

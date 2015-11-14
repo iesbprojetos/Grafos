@@ -7,6 +7,9 @@ public final class Constants {
     public static final int TYPE_GRAPH = 0;
     public static final int TYPE_DIGRAPH = 1;
 
+    public static final int COST_NO = 0;
+    public static final int COST_YES = 1;
+
     public static final int ALGO_MATRIX = 0;
     public static final int ALGO_LIST = 1;
 
@@ -19,6 +22,7 @@ public final class Constants {
     public static final int MODE_FIND_PATH = 3;
     public static final int MODE_DEPTH_SEARCH = 4;
     public static final int MODE_CC_SEARCH = 5;
+    public static final int MODE_DIJKSTRA = 6;
 
     public static final int RESULT_OK = 0;
     public static final int RESULT_INVALID_VERTEX = 1;

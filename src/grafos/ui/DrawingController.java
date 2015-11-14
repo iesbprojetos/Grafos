@@ -2,10 +2,12 @@ package grafos.ui;
 
 import static grafos.Constants.*;
 
+import grafos.datatypes.CostSetListener;
 import grafos.datatypes.GraphBase;
 import grafos.datatypes.list.VectorDigraph;
 import grafos.datatypes.list.VectorGraph;
 import grafos.datatypes.matriz.MatrixDigraph;
+import grafos.datatypes.matriz.MatrixDrigraphCost;
 import grafos.datatypes.matriz.MatrixGraph;
 import javafx.animation.AnimationTimer;
 import javafx.beans.value.ChangeListener;
@@ -41,7 +43,7 @@ import java.util.*;
 /**
  * Created by dfcarvalho on 8/21/15.
  */
-public class DrawingController implements Initializable {
+public class DrawingController implements Initializable, CostSetListener {
     private static final int DIAMETER = 40;
     private static final int OFFSET_X = 5;
     private static final int OFFSET_Y = 5;
@@ -66,6 +68,10 @@ public class DrawingController implements Initializable {
     @FXML
     private Button btnDepthSearch;
     @FXML
+    private Button btnDAGmin;
+    @FXML
+    private Button btnDijkstra;
+    @FXML
     private TableView<VertexTableRow> tableView;
     @FXML
     private CheckBox cbTree;
@@ -82,6 +88,7 @@ public class DrawingController implements Initializable {
     private double scaleY;
 
     private int graphType;
+    private int costType;
     private int algoType;
 
     private GraphBase graph;
@@ -102,14 +109,22 @@ public class DrawingController implements Initializable {
         createCanvas();
         mode = 0;
         selectedVertex = null;
-        buttons = new ArrayList<>(Arrays.asList(btnCreate, btnAddArc, btnRemoveArc, btnFindPath, btnDepthSearch));
+        buttons = new ArrayList<>(
+                Arrays.asList(btnCreate, btnAddArc, btnRemoveArc,
+                        btnFindPath, btnDepthSearch, btnDAGmin,
+                        btnDijkstra)
+        );
     }
 
     public void createGraph(int v) {
         switch (algoType) {
             case ALGO_MATRIX:
                 if (graphType == TYPE_DIGRAPH) {
-                    graph = new MatrixDigraph(v);
+                    if (costType == COST_NO) {
+                        graph = new MatrixDigraph(v);
+                    } else if (costType == COST_YES) {
+                        graph = new MatrixDrigraphCost(v);
+                    }
                 } else if (graphType == TYPE_GRAPH) {
                     graph = new MatrixGraph(v);
                 }
@@ -132,8 +147,14 @@ public class DrawingController implements Initializable {
         }
     }
 
-    public void insertArc(int v, int w) {
-        int result = graph.insertArc(v, w);
+    public void insertArc(int v, int w, int cost) {
+        int result;
+
+        if (cost == 1) {
+            result = graph.insertArc(v, w);
+        } else {
+            result = ((MatrixDrigraphCost)graph).insertArc(v,w,cost);
+        }
 
         if (result != RESULT_OK) {
             String msg = "";
@@ -318,6 +339,23 @@ public class DrawingController implements Initializable {
         mode = MODE_DEPTH_SEARCH;
     }
 
+    @FXML
+    protected void handleDAGMinButtonAction(ActionEvent event) {
+        // TODO:
+    }
+
+    @FXML
+    protected void handleDijkstraButtonAction(ActionEvent event) {
+        // TODO:
+        if (graph != null) {
+            selectButton((Button) event.getSource());
+
+            mode = MODE_DIJKSTRA;
+        } else {
+            // TODO: criar grafo primeiro - mostrar msg
+        }
+    }
+
     private void fillTable() {
         ObservableList<VertexTableRow> data = FXCollections.observableArrayList();
 
@@ -375,7 +413,7 @@ public class DrawingController implements Initializable {
 
         // draw temporary arc (mouse dragging)
         if (tempArcStart != null && tempArcEnd != null) {
-            drawArc(gc, tempArcStart, tempArcEnd, ARC_TYPE_TEMP);
+            drawArc(gc, tempArcStart, tempArcEnd, 0, ARC_TYPE_TEMP);
         }
 
         if (graph != null) {
@@ -385,22 +423,24 @@ public class DrawingController implements Initializable {
                 for (int v = 0; v < graph.getVertices(); v++) {
                     // draw arcs from this vertex to all others
                     for (int w = 0; w < graph.getVertices(); w++) {
-                        if (adjMatrix[v][w] == 1) {
-                            drawArc(gc, v, w, graph.getVertices());
+                        int cost = adjMatrix[v][w];
+                        if (cost != 0) {
+                            drawArc(gc, v, w, cost, graph.getVertices());
                         }
                     }
+
                     // draw vertex circle
                     boolean isSelected = (selectedVertex != null && v == selectedVertex);
                     drawVertex(gc, v, graph.getVertices(), isSelected);
                 }
             } else if (algoType == ALGO_LIST) {
-                // TODO:
                 List<LinkedList<Integer>> list = ((VectorDigraph) graph).getAdjVector();
                 for (int v = 0; v < graph.getVertices(); v++) {
                     LinkedList<Integer> adjList = list.get(v);
 
                     for (Integer w : adjList) {
-                        drawArc(gc, v, w, graph.getVertices());
+                        // TODO: cost
+                        drawArc(gc, v, w, 1, graph.getVertices());
                     }
 
                     // draw vertex circle
@@ -438,7 +478,7 @@ public class DrawingController implements Initializable {
         gc.strokeText(String.valueOf(v), centerX - OFFSET_X, centerY + OFFSET_Y);
     }
 
-    private void drawArc(GraphicsContext gc, int v, int w, int numV) {
+    private void drawArc(GraphicsContext gc, int v, int w, int cost, int numV) {
         double startX = vertexCenterX(v, numV);
         double startY = vertexCenterY(v, numV);
         double endX = vertexCenterX(w, numV);
@@ -479,10 +519,10 @@ public class DrawingController implements Initializable {
             }
         }
 
-        drawArc(gc, start, end, arcType);
+        drawArc(gc, start, end, cost, arcType);
     }
 
-    private void drawArc(GraphicsContext gc, Point2D start, Point2D end, int arcType) {
+    private void drawArc(GraphicsContext gc, Point2D start, Point2D end, int cost, int arcType) {
         boolean shouldDraw = true;
         double angle = Math.toDegrees(Math.atan2(end.getY() - start.getY(), end.getX() - start.getX()));
 
@@ -518,6 +558,19 @@ public class DrawingController implements Initializable {
             gc.setLineWidth(3);
             gc.strokeLine(start.getX(), start.getY(), arrowEndX, arrowEndY);
 
+            // cost
+            if (costType == COST_YES && arcType != ARC_TYPE_TEMP) {
+                double costX = (end.getX() - start.getX())/2 + start.getX();
+                double costY = (end.getY() - start.getY())/2 + start.getY();
+                gc.translate(costX, costY);
+                gc.rotate(angle);
+                gc.setLineWidth(1);
+                gc.setStroke(Color.RED);
+                gc.strokeText(String.valueOf(cost), -1, -1);
+                gc.rotate(-angle);
+                gc.translate(-costX, -costY);
+            }
+
             // arrow
             if (graphType == TYPE_DIGRAPH) {
                 Image arrow = new Image("/res/arrow_head.png", ARROW_SIZE, ARROW_SIZE, false, true);
@@ -549,8 +602,17 @@ public class DrawingController implements Initializable {
         this.graphType = graphType;
     }
 
+    public void setCostType(int costType) {
+        this.costType = costType;
+    }
+
     public void setAlgoType(int algoType) {
         this.algoType = algoType;
+    }
+
+    @Override
+    public void costSet(int v, int w, int cost) {
+        insertArc(v, w, cost);
     }
 
     private ChangeListener<Number> listenerCanvasSize = new ChangeListener<Number>() {
@@ -572,6 +634,9 @@ public class DrawingController implements Initializable {
                     break;
                 case MODE_FIND_PATH:
                     handleFindPath(mouseEvent);
+                    break;
+                case MODE_DIJKSTRA:
+                    handleDijkstra(mouseEvent);
                     break;
             }
         }
@@ -605,7 +670,31 @@ public class DrawingController implements Initializable {
                 Integer releasedVertex = vertexOnPosition(mouseX, mouseY);
                 if (releasedVertex != null && selectedVertex != releasedVertex) {
                     if (graph != null) {
-                        insertArc(selectedVertex, releasedVertex);
+                        if (costType == COST_NO) {
+                            insertArc(selectedVertex, releasedVertex, 1);
+                        } else if (costType == COST_YES) {
+                            try {
+                                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/res/edit_arc.fxml"));
+                                Parent root = fxmlLoader.load();
+
+                                ArcCostController controller = fxmlLoader.getController();
+                                controller.setV(selectedVertex);
+                                controller.setW(releasedVertex);
+                                controller.setListener(DrawingController.this);
+
+                                Scene scene = new Scene(root);
+
+                                Stage dialog = new Stage(StageStyle.UTILITY);
+                                dialog.initModality(Modality.WINDOW_MODAL);
+                                dialog.setTitle("Custo - Arco [" + selectedVertex + "," + releasedVertex + "]");
+                                dialog.setScene(scene);
+                                dialog.setWidth(200);
+                                dialog.setHeight(100);
+                                dialog.show();
+                            } catch (IOException e) {
+                                // TODO:
+                            }
+                        }
                     }
 
                     System.out.println("Released Vertex: " + releasedVertex);
@@ -659,6 +748,33 @@ public class DrawingController implements Initializable {
                         }
                     }
                 }
+            }
+        }
+
+        private void handleDijkstra(MouseEvent mouseEvent) {
+            try {
+                MatrixDrigraphCost costGraph = (MatrixDrigraphCost)graph;
+
+                // TODO: !!verificar se possui custos negativos!!
+
+                double mouseX  = mouseEvent.getX() / scaleX;
+                double mouseY = mouseEvent.getY() / scaleY;
+
+                if (mouseEvent.getEventType() == MouseEvent.MOUSE_CLICKED) {
+                    if (graph != null) {
+                        Integer clickedVertex = vertexOnPosition(mouseX, mouseY);
+                        if (clickedVertex != null) {
+                            selectedVertex = clickedVertex;
+                            costGraph.dijkstra(clickedVertex);
+
+                            // TODO: update ui?
+                            System.out.println("Fim Dijkstra.");
+                        }
+                    }
+                }
+            } catch (ClassCastException e ) {
+                // TODO: não pode usar dijkstra em grafo sem custo - mostrar erro
+                e.printStackTrace();
             }
         }
 

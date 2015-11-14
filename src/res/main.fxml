@@ -20,6 +20,7 @@
 
     <fx:define>
         <ToggleGroup fx:id="graphType"/>
+        <ToggleGroup fx:id="costType"/>
         <ToggleGroup fx:id="algorithmType"/>
     </fx:define>
 
@@ -33,7 +34,6 @@
         text="Tipo de Grafos:"
         GridPane.columnIndex="0"
         GridPane.rowIndex="1"/>
-
     <RadioButton
         text="Digrafo"
         toggleGroup="$graphType"
@@ -46,25 +46,40 @@
         GridPane.columnIndex="1"
         GridPane.rowIndex="2"/>
     <Label
-        text="Algoritmo:"
+        text="Custo:"
         GridPane.columnIndex="0"
         GridPane.rowIndex="3"/>
+    <RadioButton
+        text="Sem Custo"
+        toggleGroup="$costType"
+        selected="true"
+        GridPane.columnIndex="1"
+        GridPane.rowIndex="3"/>
+    <RadioButton
+        text="Com Custo"
+        toggleGroup="$costType"
+        GridPane.columnIndex="1"
+        GridPane.rowIndex="4"/>
+    <Label
+        text="Algoritmo:"
+        GridPane.columnIndex="0"
+        GridPane.rowIndex="5"/>
     <RadioButton
         text="Matriz de Adjacência"
         toggleGroup="$algorithmType"
         selected="true"
         GridPane.columnIndex="1"
-        GridPane.rowIndex="3"/>
+        GridPane.rowIndex="5"/>
     <RadioButton
         text="Lista de Adjacência"
         toggleGroup="$algorithmType"
         GridPane.columnIndex="1"
-        GridPane.rowIndex="4"/>
+        GridPane.rowIndex="6"/>
     <Button
         text="Iniciar"
         onAction="#handleStartButtonAction"
         GridPane.columnIndex="0"
-        GridPane.rowIndex="6"
+        GridPane.rowIndex="7"
         GridPane.columnSpan="2"
         GridPane.halignment="CENTER"/>
 
