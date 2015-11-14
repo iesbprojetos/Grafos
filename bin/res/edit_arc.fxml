@@ -1,0 +1,41 @@
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Button?>
+<?import javafx.geometry.Insets?>
+<GridPane
+    xmlns:fx="http://javafx.com/fxml"
+    alignment="CENTER"
+    vgap="10"
+    hgap="10"
+    styleClass="root">
+    <padding>
+        <Insets left="10" top="10" right="10" bottom="10"/>
+    </padding>
+    <Label
+        text="Vértice inicial:"
+        GridPane.columnIndex="0"
+        GridPane.rowIndex="0"/>
+    <TextField
+        fx:id="textFieldV"
+        prefWidth="50"
+        GridPane.columnIndex="1"
+        GridPane.rowIndex="0"
+        />
+    <Label
+        text="Vértice final:"
+        GridPane.columnIndex="0"
+        GridPane.rowIndex="1"/>
+    <TextField
+        fx:id="textFieldW"
+        prefWidth="50"
+        GridPane.columnIndex="1"
+        GridPane.rowIndex="1"/>
+    <Button
+        text="OK"
+        GridPane.columnIndex="0"
+        GridPane.rowIndex="2"
+        GridPane.columnSpan="2"
+        GridPane.halignment="CENTER"
+        onAction="#onCreateButtonPressed"/>
+</GridPane>
