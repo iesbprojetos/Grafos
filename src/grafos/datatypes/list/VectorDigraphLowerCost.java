@@ -14,37 +14,33 @@ public class VectorDigraphLowerCost extends VectorDigraph {
 		super(vertices);
 	}
 	
-	int custo [] ;
+	int cost [] ;
 	int adjVector [];
-	protected int[] ts;
+	protected int ts [] ;
+	
 	
 	public int insertArc(int v, int w) {
         int result = super.insertArc(v,w);
 
         if (result == RESULT_OK) {
-        	adjVector[v] = custo[v];
+        	adjVector[v] = cost[v];
         }
 
         return result;
     }
-	
-	public void Bellman_ford(int v, int w){
-		
-		
-	}
 			
     public void Dagmin (int s){
     	int i = 0;
 	for (int v  = 0; v < vertices ; v++){
-		custo[v] = INF;
+		cost[v] = INF;
 		                 }
-		custo[s] = 0;
+		cost[s] = 0;
 		
 		for (int v = ts[i];i < vertices;v = ts[i++]){
 		for (int w = 0;w < vertices;w++){
 			if( adjVector[v] != 0){
-		       if (custo[w] > custo[v]+adjVector[v]){
-		           custo[w] = custo[i]+adjVector[v];
+		       if (cost[w] > cost[v]+adjVector[v]){
+		           cost[w] = cost[i]+adjVector[v];
 		       }
 		    }
 		  }
@@ -53,13 +49,16 @@ public class VectorDigraphLowerCost extends VectorDigraph {
     
     public void FordSentinela(int s){
     	int Sentinela = vertices;
+    	int k = 0;
+    	int retorno_sentinela = -1;
+    	
     	List<Integer> Sentilist = new ArrayList<Integer>();
     	
     	for (int v = 0;v < vertices;v++){
-    	custo[v] = INF;
+    	cost[v] = INF;
     	parent[v] = -1; }
     	
-    	custo[s] = 0;
+    	cost[s] = 0;
     	parent[s] = 0;
     	
     	Sentilist.add(s);
@@ -67,11 +66,28 @@ public class VectorDigraphLowerCost extends VectorDigraph {
     	
     	while(Sentilist.size() > 0){
     	   int v = Sentilist.remove(0);
+    	   if (v == Sentinela){
+    	      if (k++ == vertices){
+    	         if (!(Sentilist.isEmpty())){
+    	        	   retorno_sentinela = 0;}
+    	         else{
+    	        	  retorno_sentinela = 1; }
     	   
-    	
-    }
-    
-    
-	}
+    	         Sentilist.add(Sentinela);  }
+    	      else{ 
+    	    	  for (int j = 0; j < adjVector[v];j++){
+    	             for (int p = adjVector[v]; p != 0; p = j){
+    	            	
+    	                if (cost[vertices] > cost[v]+ p) {
+    	                    cost[vertices] = cost[v]+p;
+    	                    parent[vertices] = v;
+    	                    Sentilist.add(vertices);;  }
+    	       }
+    	     }       	
+    	   }	
+        }
+     }
+   } 	
 }
+
  
