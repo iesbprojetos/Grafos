@@ -11,22 +11,22 @@ import java.util.List;
  * Created by dfcarvalho on 9/10/15.
  */
 public class VectorDigraph extends GraphBase {
-    List<LinkedList<Integer>> adjVector = new ArrayList<LinkedList<Integer>>();
+    protected List<LinkedList<VectorElement>> adjVector;
 
     public VectorDigraph(int vertices) {
         super(vertices);
 
         adjVector = new ArrayList<>(vertices);
         for (int i = 0; i < vertices; i++) {
-            adjVector.add(new LinkedList<Integer>());
+            adjVector.add(new LinkedList<>());
         }
     }
 
-    public List<LinkedList<Integer>> getAdjVector() {
+    public List<LinkedList<VectorElement>> getAdjVector() {
         return adjVector;
     }
 
-    protected void setAdjVector(List<LinkedList<Integer>> adjVector) {
+    protected void setAdjVector(List<LinkedList<VectorElement>> adjVector) {
         this.adjVector = adjVector;
     }
 
@@ -42,20 +42,16 @@ public class VectorDigraph extends GraphBase {
             return RESULT_INVALID_VERTEX;
         }
 
-        // verifica se arco existe
-        if (adjVector.get(v) == null) {
-            adjVector.add(v, new LinkedList<Integer>());
-        }
-
-        for (int adjVertex : adjVector.get(v)) {
-            if (adjVertex == w) {
+        for (VectorElement adjVertex : adjVector.get(v)) {
+            if (adjVertex.getW() == w) {
                 // arco já existe
                 return RESULT_ARC_ALREADY_EXISTS;
             }
         }
 
         // senão, insere arco
-        adjVector.get(v).push(w);
+        VectorElement adjVertex = new VectorElement(w, 1);
+        adjVector.get(v).push(adjVertex);
         arcs++;
         return RESULT_OK;
     }
@@ -73,7 +69,8 @@ public class VectorDigraph extends GraphBase {
         }
 
         // remove arco (se existir)
-        if (!adjVector.get(v).remove(new Integer(w))) {
+        VectorElement adjVertex = new VectorElement(w, 1);
+        if (!adjVector.get(v).remove(adjVertex)) {
             // arco não existe
             return RESULT_ARC_NOT_FOUND;
         }
@@ -94,8 +91,9 @@ public class VectorDigraph extends GraphBase {
         d[v] = time++;
 
         // percorre vetor de adjacência do vetor v
-        LinkedList<Integer> vector = adjVector.get(v);
-        for (Integer w : vector) {
+        LinkedList<VectorElement> vector = adjVector.get(v);
+        for (VectorElement adjVertex : vector) {
+            int w = adjVertex.getW();
             if (d[w] == -1) {
                 parent[w] = v;
                 findPathR(w);
@@ -121,8 +119,9 @@ public class VectorDigraph extends GraphBase {
         boolean loop = false;
 
         // percorre o vetor de adjacência do v
-        LinkedList<Integer> vector = adjVector.get(v);
-        for (Integer w : vector) {
+        LinkedList<VectorElement> vector = adjVector.get(v);
+        for (VectorElement adjVertex : vector) {
+            int w = adjVertex.getW();
             // verifica se vértice w já foi visitado
             if (d[w] == -1) {
                 // vértice w não foi visitado...
@@ -156,10 +155,12 @@ public class VectorDigraph extends GraphBase {
     protected VectorDigraph getTransposedGraph() {
         VectorDigraph tGraph = new VectorDigraph(vertices);
 
-        List<LinkedList<Integer>> tAdjVector = tGraph.getAdjVector();
+        List<LinkedList<VectorElement>> tAdjVector = tGraph.getAdjVector();
         for (int v = 0; v < vertices; v++) {
-            for (Integer w : adjVector.get(v)) {
-                tAdjVector.get(w).add(v);
+            for (VectorElement adjVertex : adjVector.get(v)) {
+                int w = adjVertex.getW();
+                VectorElement adjVertexV = new VectorElement(v, adjVertex.getCost());
+                tAdjVector.get(w).add(adjVertexV);
             }
         }
 
@@ -172,7 +173,8 @@ public class VectorDigraph extends GraphBase {
     protected void depthSearchCCR(int v) {
         cc[v] = countCC;
 
-        for (Integer w : adjVector.get(v)) {
+        for (VectorElement adjVertex : adjVector.get(v)) {
+            int w = adjVertex.getW();
             if (cc[w] == -1) {
                 depthSearchCCR(w);
             }

@@ -21,14 +21,17 @@ public final class Constants {
     public static final int MODE_REMOVE_ARC = 2;
     public static final int MODE_FIND_PATH = 3;
     public static final int MODE_DEPTH_SEARCH = 4;
-    public static final int MODE_CC_SEARCH = 5;
+    public static final int MODE_DAGMIN = 5;
     public static final int MODE_DIJKSTRA = 6;
 
     public static final int RESULT_OK = 0;
-    public static final int RESULT_INVALID_VERTEX = 1;
-    public static final int RESULT_ARC_ALREADY_EXISTS = 2;
-    public static final int RESULT_ARC_NOT_FOUND = 3;
+    public static final int RESULT_UNKNOWN = 1;
+    public static final int RESULT_INVALID_VERTEX = 2;
+    public static final int RESULT_ARC_ALREADY_EXISTS = 3;
+    public static final int RESULT_ARC_NOT_FOUND = 4;
 
+
+    public static final String ERROR_MSG_UNKNOWN = "Erro desconhecido.";
     public static final String ERROR_MSG_NO_PATH = "Caminho não encontrado.";
     public static final String ERROR_MSG_INVALID_VERTEX = "Vértices inválidos";
     public static final String ERROR_MSG_ARC_ALREADY_EXISTS = "O arco que você tentou inserir já existe";

@@ -19,7 +19,7 @@ public class MatrixDrigraphCost extends MatrixDigraph {
      * Fila de prioridades
      */
     protected int[] pq;
-    
+
     protected int[] ts;
 
 
@@ -51,7 +51,7 @@ public class MatrixDrigraphCost extends MatrixDigraph {
         parent[s] = s;
         PQinsert(s, custo[s]);
 
-        while(!PQempty()) {
+        while (!PQempty()) {
             int v = PQdelmin();
             for (int w = 0; w < vertices; w++) {
                 if (adjMatrix[v][w] != 0) {
@@ -110,24 +110,28 @@ public class MatrixDrigraphCost extends MatrixDigraph {
 
         return true;
     }
-    
-    public void Dagmin (int s){
-    	int i = 0;
-	for (int v  = 0;v< vertices ;v++){
-		custo[v] = INF;
-		                 }
-		custo[s] = 0;
-		
-		for (int v = ts[i];i < vertices;v = ts[i++]){
-		for (int w = 0;w < vertices;w++){
-			if( adjMatrix[v][w] != 0){
-		       if (custo[w] > custo[v]+adjMatrix[v][w]){
-		           custo[w] = custo[i]+adjMatrix[v][w];
-		       }
-		    }
-		  }
-	    }
-      }
-	}
+
+    public void Dagmin(int s) {
+        int i = 0;
+        for (int v = 0; v < vertices; v++) {
+            custo[v] = INF;
+        }
+        custo[s] = 0;
+
+        for (int v = ts[i]; i < vertices; v = ts[i++]) {
+            for (int w = 0; w < vertices; w++) {
+                if (adjMatrix[v][w] != 0) {
+                    if (custo[w] > custo[v] + adjMatrix[v][w]) {
+                        custo[w] = custo[i] + adjMatrix[v][w];
+                    }
+                }
+            }
+        }
+    }
+
+    public int[] getCusto() {
+        return custo;
+    }
+}
   
 

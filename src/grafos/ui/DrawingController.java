@@ -5,6 +5,8 @@ import static grafos.Constants.*;
 import grafos.datatypes.CostSetListener;
 import grafos.datatypes.GraphBase;
 import grafos.datatypes.list.VectorDigraph;
+import grafos.datatypes.list.VectorDigraphLowerCost;
+import grafos.datatypes.list.VectorElement;
 import grafos.datatypes.list.VectorGraph;
 import grafos.datatypes.matriz.MatrixDigraph;
 import grafos.datatypes.matriz.MatrixDrigraphCost;
@@ -131,7 +133,11 @@ public class DrawingController implements Initializable, CostSetListener {
                 break;
             case ALGO_LIST:
                 if (graphType == TYPE_DIGRAPH) {
-                    graph = new VectorDigraph(v);
+                    if (costType == COST_NO) {
+                        graph = new VectorDigraph(v);
+                    } else if (costType == COST_YES) {
+                        graph = new VectorDigraphLowerCost(v);
+                    }
                 } else if (graphType == TYPE_GRAPH) {
                     graph = new VectorGraph(v);
                 }
@@ -153,13 +159,22 @@ public class DrawingController implements Initializable, CostSetListener {
         if (cost == 1) {
             result = graph.insertArc(v, w);
         } else {
-            result = ((MatrixDrigraphCost)graph).insertArc(v,w,cost);
+            if (graph instanceof MatrixDrigraphCost) {
+                result = ((MatrixDrigraphCost) graph).insertArc(v, w, cost);
+            } else if (graph instanceof VectorDigraphLowerCost) {
+                result = ((VectorDigraphLowerCost) graph).insertArc(v, w, cost);
+            } else {
+                result = RESULT_UNKNOWN;
+            }
         }
 
         if (result != RESULT_OK) {
             String msg = "";
 
             switch (result) {
+                case RESULT_UNKNOWN:
+                    msg = ERROR_MSG_UNKNOWN;
+                    break;
                 case RESULT_INVALID_VERTEX:
                     msg = ERROR_MSG_INVALID_VERTEX;
                     break;
@@ -260,6 +275,7 @@ public class DrawingController implements Initializable, CostSetListener {
         }
 
         mode = MODE_CREATE_GRAPH;
+        selectedVertex = null;
     }
 
     @FXML
@@ -267,6 +283,7 @@ public class DrawingController implements Initializable, CostSetListener {
         selectButton((Button)event.getSource());
 
         mode = MODE_INSERT_ARC;
+        selectedVertex = null;
     }
 
     @FXML
@@ -292,6 +309,7 @@ public class DrawingController implements Initializable, CostSetListener {
         }
 
         mode = MODE_REMOVE_ARC;
+        selectedVertex = null;
     }
 
     @FXML
@@ -299,6 +317,7 @@ public class DrawingController implements Initializable, CostSetListener {
         selectButton((Button)event.getSource());
 
         mode = MODE_FIND_PATH;
+        selectedVertex = null;
     }
 
     @FXML
@@ -337,11 +356,33 @@ public class DrawingController implements Initializable, CostSetListener {
         }
 
         mode = MODE_DEPTH_SEARCH;
+        selectedVertex = null;
     }
 
     @FXML
     protected void handleDAGMinButtonAction(ActionEvent event) {
         // TODO:
+        if (graph != null) {
+            boolean valid = false;
+            if (graph instanceof MatrixDrigraphCost) {
+                valid = true;
+            } else if (graph instanceof VectorDigraphLowerCost) {
+                valid = true;
+            }
+
+            if (!valid) {
+                // TODO: não pode usar dijkstra em grafo sem custo - mostrar erro
+                return;
+            }
+
+            // TODO: !!verificar é acíclico!!
+
+            selectButton((Button)event.getSource());
+            mode = MODE_DAGMIN;
+            selectedVertex = null;
+        } else {
+            // TOOD: criar grafo primeiro - mostrar msg
+        }
     }
 
     @FXML
@@ -351,6 +392,7 @@ public class DrawingController implements Initializable, CostSetListener {
             selectButton((Button) event.getSource());
 
             mode = MODE_DIJKSTRA;
+            selectedVertex = null;
         } else {
             // TODO: criar grafo primeiro - mostrar msg
         }
@@ -434,13 +476,12 @@ public class DrawingController implements Initializable, CostSetListener {
                     drawVertex(gc, v, graph.getVertices(), isSelected);
                 }
             } else if (algoType == ALGO_LIST) {
-                List<LinkedList<Integer>> list = ((VectorDigraph) graph).getAdjVector();
+                List<LinkedList<VectorElement>> list = ((VectorDigraph) graph).getAdjVector();
                 for (int v = 0; v < graph.getVertices(); v++) {
-                    LinkedList<Integer> adjList = list.get(v);
+                    LinkedList<VectorElement> adjList = list.get(v);
 
-                    for (Integer w : adjList) {
-                        // TODO: cost
-                        drawArc(gc, v, w, 1, graph.getVertices());
+                    for (VectorElement adjVertex : adjList) {
+                        drawArc(gc, v, adjVertex.getW(), adjVertex.getCost(), graph.getVertices());
                     }
 
                     // draw vertex circle
@@ -476,6 +517,28 @@ public class DrawingController implements Initializable, CostSetListener {
 
         gc.setStroke(Color.WHITE);
         gc.strokeText(String.valueOf(v), centerX - OFFSET_X, centerY + OFFSET_Y);
+
+        // draw cost, if needed
+        if (costType == COST_YES) {
+            int[] costVector = null;
+
+            if (graph instanceof MatrixDrigraphCost) {
+                MatrixDrigraphCost costGraph = (MatrixDrigraphCost) graph;
+                costVector = costGraph.getCusto();
+            } else if (graph instanceof VectorDigraphLowerCost) {
+                VectorDigraphLowerCost costGraph = (VectorDigraphLowerCost) graph;
+                costVector = costGraph.getCusto();
+            }
+
+            if (costVector != null) {
+                int cost = costVector[v];
+                double costX = costCenterX(v, numV);
+                double costY = costCenterY(v, numV);
+
+                gc.setStroke(Color.RED);
+                gc.strokeText(String.valueOf(cost), costX, costY);
+            }
+        }
     }
 
     private void drawArc(GraphicsContext gc, int v, int w, int cost, int numV) {
@@ -598,6 +661,32 @@ public class DrawingController implements Initializable, CostSetListener {
         return CANVAS_HEIGHT / 2 + (CANVAS_HEIGHT / 2 - DIAMETER * 2) * Math.sin(Math.toRadians(angle));
     }
 
+    private double costCenterX(int v, int numV) {
+        double diffAngle = 360 / (double) numV;
+        double angle = v * diffAngle - 90;
+
+        double vertexCenterX = vertexCenterX(v, numV);
+
+        /*
+        double costX = 0;
+
+        if (angle > 0 && angle < 180) {
+            costX =
+        }
+        */
+
+        return vertexCenterX + (DIAMETER * Math.cos(Math.toRadians(angle))) - 1;
+    }
+
+    private double costCenterY(int v, int numV) {
+        double diffAngle = 360 / (double) numV;
+        double angle = v * diffAngle - 90;
+
+        double vertexCenterY = vertexCenterY(v, numV);
+
+        return vertexCenterY + (DIAMETER * Math.sin(Math.toRadians(angle))) - 1;
+    }
+
     public void setGraphType(int graphType) {
         this.graphType = graphType;
     }
@@ -634,6 +723,9 @@ public class DrawingController implements Initializable, CostSetListener {
                     break;
                 case MODE_FIND_PATH:
                     handleFindPath(mouseEvent);
+                    break;
+                case MODE_DAGMIN:
+                    handleDAGmin(mouseEvent);
                     break;
                 case MODE_DIJKSTRA:
                     handleDijkstra(mouseEvent);
@@ -706,6 +798,19 @@ public class DrawingController implements Initializable, CostSetListener {
             }
         }
 
+        private void handleRemoveMode(MouseEvent mouseEvent) {
+            double mouseX = mouseEvent.getX() / scaleX;
+            double mouseY = mouseEvent.getY() / scaleY;
+
+            if (mouseEvent.getEventType() == MouseEvent.MOUSE_CLICKED) {
+                if (graph != null) {
+                    if (selectedVertex != null) {
+
+                    }
+                }
+            }
+        }
+
         private void handleFindPath(MouseEvent mouseEvent) {
             double mouseX = mouseEvent.getX() / scaleX;
             double mouseY = mouseEvent.getY() / scaleY;
@@ -751,6 +856,39 @@ public class DrawingController implements Initializable, CostSetListener {
             }
         }
 
+        private void handleDAGmin(MouseEvent mouseEvent) {
+            try {
+                double mouseX  = mouseEvent.getX() / scaleX;
+                double mouseY = mouseEvent.getY() / scaleY;
+
+                if (mouseEvent.getEventType() == MouseEvent.MOUSE_CLICKED) {
+                    if (graph != null) {
+                        Integer clickedVertex = vertexOnPosition(mouseX, mouseY);
+                        if (clickedVertex != null) {
+                            selectedVertex = clickedVertex;
+
+                            if (graph instanceof MatrixDrigraphCost) {
+                                // TODO: dagmin:
+                                // ((MatrixDrigraphCost)graph).Dagmin(clickedVertex);
+                            } else if (graph instanceof VectorDigraphLowerCost) {
+                                ((VectorDigraphLowerCost)graph).Dagmin(clickedVertex);
+                            } else {
+                                // TODO: invalid
+                            }
+
+                            fillTable();
+
+                            // TODO: update ui?
+                            System.out.println("Fim Dijkstra.");
+                        }
+                    }
+                }
+            } catch (ClassCastException e ) {
+                // TODO: não pode usar dijkstra em grafo sem custo - mostrar erro
+                e.printStackTrace();
+            }
+        }
+
         private void handleDijkstra(MouseEvent mouseEvent) {
             try {
                 MatrixDrigraphCost costGraph = (MatrixDrigraphCost)graph;
@@ -768,7 +906,7 @@ public class DrawingController implements Initializable, CostSetListener {
                             costGraph.dijkstra(clickedVertex);
 
                             // TODO: update ui?
-                            System.out.println("Fim Dijkstra.");
+                            fillTable();
                         }
                     }
                 }
