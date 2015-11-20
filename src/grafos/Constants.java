@@ -55,6 +55,7 @@ public final class Constants {
     public static final String ERROR_MSG_INVALID_VERTEX = "Vértices inválidos";
     public static final String ERROR_MSG_ARC_ALREADY_EXISTS = "O arco que você tentou inserir já existe";
     public static final String ERROR_MSG_ARC_NOT_FOUND = "O arco que você tentou remover não existe";
+    public static final String ERROR_MSG_DAGMIN_CYCLE = "O algoritmo DAGmin não pode ser usado em grafos que possuem ciclos.";
 
     public static final int ARC_TYPE_TEMP = 0;
     public static final int ARC_TYPE_TREE = 1;

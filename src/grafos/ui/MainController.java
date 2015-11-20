@@ -60,7 +60,8 @@ public class MainController {
 
             Stage drawingStage = new Stage();
             drawingStage.setTitle(selectedGraphType.getText() + " - " + selectedAlgorithm.getText() + " - " + selectedCost.getText());
-            drawingStage.setScene(new Scene(root, 800, 600));
+            drawingStage.setScene(new Scene(root)); //1200, 600
+            drawingStage.sizeToScene();
             drawingStage.show();
 
             // close main window

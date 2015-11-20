@@ -123,12 +123,14 @@ public class MatrixDigraphCost extends MatrixDigraph {
      *  -> Precisa da ordem topológica.
      * @param s vértice inicial
      */
-    public void DAGmin(int s) {
+    public boolean DAGmin(int s) {
         costFromS = new int[vertices];
         parent = new int[vertices];
 
         if (topologicalSort == null) {
-            depthSearchComplete();
+            if (depthSearchComplete()) {
+                return false;
+            }
         }
 
         for (int v = 0; v < vertices; v++) {
@@ -149,6 +151,8 @@ public class MatrixDigraphCost extends MatrixDigraph {
                 }
             }
         }
+
+        return true;
     }
 
     /**

@@ -654,10 +654,13 @@ public class DrawingController implements Initializable, CostSetListener {
         if (isSelected) {
             colorFill = Color.RED;
         } else {
-            int[] cc = graph.getCc();
-            if (cc != null) {
-                int componentColor = cc[v] < vertexColors.length ? cc[v] : cc[v] % vertexColors.length;
-                colorFill = vertexColors[componentColor];
+            // TODO: TEST
+            if (mode == Mode.DEPTH_SEARCH) {
+                int[] cc = graph.getCc();
+                if (cc != null) {
+                    int componentColor = cc[v] < vertexColors.length ? cc[v] : cc[v] % vertexColors.length;
+                    colorFill = vertexColors[componentColor];
+                }
             }
         }
         gc.setFill(colorFill);
@@ -730,8 +733,9 @@ public class DrawingController implements Initializable, CostSetListener {
             }
         }
 
-        if (mode == Mode.BREADTH_SEARCH || mode == Mode.DIJKSTRA_SPT || mode == Mode.DIJKSTRA_HEAP_SPT ||
-                mode == Mode.DAGMIN_SPT || mode == Mode.BELLMAN_FORD_SPT || mode == Mode.BF_SENTINEL_SPT) {
+        if (selectedVertex != null &&
+                (mode == Mode.BREADTH_SEARCH || mode == Mode.DIJKSTRA_SPT || mode == Mode.DIJKSTRA_HEAP_SPT ||
+                mode == Mode.DAGMIN_SPT || mode == Mode.BELLMAN_FORD_SPT || mode == Mode.BF_SENTINEL_SPT)) {
             int[] parent = graph.getParent();
             if (parent != null) {
                 if (parent[w] == v) {
@@ -848,6 +852,7 @@ public class DrawingController implements Initializable, CostSetListener {
             case COST_NO:
                 btnDAGmin.setDisable(true);
                 btnDijkstra.setDisable(true);
+                btnDijkstraHeap.setDisable(true);
                 btnBellmanFord2.setDisable(true);
                 btnFloydWarshall.setDisable(true);
                 btnBellmanFordSentinel.setDisable(true);
@@ -863,6 +868,7 @@ public class DrawingController implements Initializable, CostSetListener {
         switch(algoType) {
             case ALGO_MATRIX:
                 btnBellmanFordSentinel.setDisable(true);
+                btnDijkstraHeap.setDisable(true);
                 break;
             case ALGO_LIST:
                 btnBellmanFord2.setDisable(true);
@@ -1075,17 +1081,42 @@ public class DrawingController implements Initializable, CostSetListener {
                         if (clickedVertex != null) {
                             selectedVertex = clickedVertex;
 
+                            boolean success = false;
+
                             if (graph instanceof MatrixDigraphCost) {
-                                ((MatrixDigraphCost) graph).DAGmin(clickedVertex);
+                                success = ((MatrixDigraphCost) graph).DAGmin(clickedVertex);
                             } else if (graph instanceof VectorDigraphCost) {
-                                ((VectorDigraphCost)graph).DAGmin(clickedVertex);
+                                success = ((VectorDigraphCost)graph).DAGmin(clickedVertex);
                             } else {
                                 // TODO: invalid
                             }
 
+                            if (!success) {
+                                selectedVertex = null;
+
+                                try {
+                                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/res/alert_dialog.fxml"));
+                                    Parent root = fxmlLoader.load();
+
+                                    AlertDialogController controller = fxmlLoader.getController();
+                                    controller.setMessage(ERROR_MSG_DAGMIN_CYCLE);
+
+                                    Scene scene = new Scene(root);
+
+                                    Stage dialog = new Stage(StageStyle.UTILITY);
+                                    dialog.initModality(Modality.WINDOW_MODAL);
+                                    dialog.setTitle("Alerta");
+                                    dialog.setScene(scene);
+                                    dialog.sizeToScene();
+                                    dialog.show();
+                                } catch (IOException e) {
+                                    // TODO:
+                                }
+
+                                return;
+                            }
+
                             fillTable();
-                            // TODO: update ui?
-                            System.out.println("Fim Dijkstra.");
                         }
                     }
                 }
@@ -1096,32 +1127,40 @@ public class DrawingController implements Initializable, CostSetListener {
         }
 
         private void handleDijkstra(MouseEvent mouseEvent) {
-            try {
-                MatrixDigraphCost costGraph = (MatrixDigraphCost)graph;
+            double mouseX  = mouseEvent.getX() / scaleX;
+            double mouseY = mouseEvent.getY() / scaleY;
 
-                if (costGraph.hasNegativeCosts()) {
-                    // TODO: show msg
-                    return;
-                }
+            if (mouseEvent.getEventType() == MouseEvent.MOUSE_CLICKED) {
+                if (graph != null) {
+                    Integer clickedVertex = vertexOnPosition(mouseX, mouseY);
+                    if (clickedVertex != null) {
+                        selectedVertex = clickedVertex;
+                        if (graph instanceof MatrixDigraphCost) {
+                            MatrixDigraphCost costGraph = (MatrixDigraphCost)graph;
 
-                double mouseX  = mouseEvent.getX() / scaleX;
-                double mouseY = mouseEvent.getY() / scaleY;
+                            if (costGraph.hasNegativeCosts()) {
+                                // TODO: show error msg
+                                return;
+                            }
 
-                if (mouseEvent.getEventType() == MouseEvent.MOUSE_CLICKED) {
-                    if (graph != null) {
-                        Integer clickedVertex = vertexOnPosition(mouseX, mouseY);
-                        if (clickedVertex != null) {
-                            selectedVertex = clickedVertex;
                             costGraph.dijkstra(clickedVertex);
+                        } else if (graph instanceof VectorDigraphCost) {
+                            VectorDigraphCost costGraph = (VectorDigraphCost)graph;
 
-                            // TODO: update ui?
-                            fillTable();
+                            if (costGraph.hasNegativeCosts()) {
+                                // TODO: show error msg
+                                return;
+                            }
+
+                            costGraph.dijkstra(clickedVertex);
+                        } else {
+                            // TODO: error
                         }
+
+                        // TODO: update ui?
+                        fillTable();
                     }
                 }
-            } catch (ClassCastException e ) {
-                // TODO: não pode usar dijkstra em grafo sem costFromS - mostrar erro
-                e.printStackTrace();
             }
         }
 

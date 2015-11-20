@@ -14,6 +14,11 @@ public class VectorDigraphCost extends VectorDigraph {
     
     protected int startVertex;
 
+    /**
+     * Conta quantos arcos com custos negativos o grafo possui
+     */
+    protected int negativeCosts;
+
     public VectorDigraphCost(int vertices) {
         super(vertices);
     }
@@ -34,16 +39,40 @@ public class VectorDigraphCost extends VectorDigraph {
         // senão, insere arco
         VectorElement adjVertex = new VectorElement(w, cost);
         adjVector.get(v).push(adjVertex);
+        if (cost < 0) {
+            negativeCosts++;
+        }
         arcs++;
         return RESULT_OK;
     }
 
-    public void DAGmin(int s) {
+    @Override
+    public int removeArc(int v, int w) {
+        boolean negative = false;
+
+        for (VectorElement adjVertex : adjVector.get(v)) {
+            if (adjVertex.getW() == w && adjVertex.getCost() < 0) {
+                negative = true;
+            }
+        }
+
+        int result = super.removeArc(v, w);
+
+        if (result == RESULT_OK && negative) {
+            negativeCosts--;
+        }
+
+        return result;
+    }
+
+    public boolean DAGmin(int s) {
         int i = 0;
         costFromS = new int[vertices];
 
         if (topologicalSort == null) {
-            depthSearchComplete();
+            if (depthSearchComplete()) {
+                return false;
+            }
         }
 
         parent = new int[vertices];
@@ -64,6 +93,8 @@ public class VectorDigraphCost extends VectorDigraph {
                 }
             }
         }
+
+        return true;
     }
     
     public void dijkstra(int s) {
@@ -282,6 +313,10 @@ public class VectorDigraphCost extends VectorDigraph {
 
     public int[] getCostFromS() {
         return costFromS;
+    }
+
+    public boolean hasNegativeCosts() {
+        return negativeCosts > 0;
     }
 }
  
