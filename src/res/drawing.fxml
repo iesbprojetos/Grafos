@@ -21,6 +21,33 @@
     <center>
     </center>
 
+    <top>
+        <VBox
+            alignment="TOP_LEFT"
+            spacing="10">
+            <padding>
+                <Insets left="10" right="10" bottom="10"/>
+            </padding>
+            <HBox
+                alignment="TOP_LEFT"
+                spacing="5">
+                <Label
+                    text="Modo:"/>
+                <Label
+                    fx:id="labelMode"
+                    text="Criar grafo"/>
+            </HBox>
+            <HBox
+                alignment="TOP_LEFT"
+                spacing="5">
+                <Label
+                    fx:id="labelInstruction"
+                    text="Crie um novo grafo."/>
+            </HBox>
+
+        </VBox>
+    </top>
+
     <right>
         <VBox
             alignment="TOP_LEFT"
@@ -117,60 +144,84 @@
             alignment="CENTER"
             spacing="10">
             <HBox
-                alignment="CENTER"
+                alignment="CENTER_LEFT"
                 spacing="15">
                 <padding>
                     <Insets top="10"/>
                 </padding>
+                <Label
+                    text="Editar Grafo:"
+                    minWidth="200"/>
                 <Button
                     fx:id="btnCreate"
                     text="Criar Grafo"
-                    prefWidth="150"
+                    minWidth="100"
                     onAction="#handleCreateButtonAction"/>
                 <Button
                     fx:id="btnAddArc"
                     text="Inserir Arco"
-                    prefWidth="150"
+                    minWidth="100"
                     onAction="#handleInsertButtonAction"/>
                 <Button
                     fx:id="btnRemoveArc"
                     text="Remover Arco"
-                    prefWidth="150"
+                    minWidth="100"
                     onAction="#handleRemoveButtonAction"/>
             </HBox>
             <HBox
-                alignment="CENTER"
+                alignment="CENTER_LEFT"
                 spacing="15">
                 <padding>
                     <Insets top="10"/>
                 </padding>
+                <Label
+                    text="Busca por Profundidade:"
+                    minWidth="200"/>
+                <Button
+                    fx:id="btnDepthSearch"
+                    text="Busca Completa"
+                    minWidth="100"
+                    onAction="#handleDepthSearchButtonAction"/>
                 <Button
                     fx:id="btnFindPath"
                     text="Encontrar Caminho"
-                    prefWidth="150"
+                    minWidth="100"
                     onAction="#handleFindPathButtonAction"/>
-                <Button
-                    fx:id="btnDepthSearch"
-                    text="Busca por Profundidade"
-                    prefWidth="150"
-                    onAction="#handleDepthSearchButtonAction"/>
             </HBox>
             <HBox
-                alignment="CENTER"
+                alignment="CENTER_LEFT"
                 spacing="15">
                 <padding>
                     <Insets top="10"/>
                 </padding>
+                <Label
+                    text="Busca por Largura e&#xA;Árvores de Caminhos Mínimos:"
+                    minWidth="200"/>
                 <Button
                     fx:id="btnDAGmin"
                     text="DAGmin"
-                    prefWidth="150"
+                    minWidth="100"
                     onAction="#handleDAGMinButtonAction"/>
                 <Button
                     fx:id="btnDijkstra"
                     text="Dijkstra"
-                    prefWidth="150"
+                    minWidth="100"
                     onAction="#handleDijkstraButtonAction"/>
+                <Button
+                    fx:id="btnBellmanFord2"
+                    text="Bellman-Ford"
+                    minWidth="100"
+                    onAction="#handleBellmanFord2ButtonAction"/>
+                <Button
+                    fx:id="btnBellmanFordSentinel"
+                    text="Bellman-Ford Sentinela"
+                    minWidth="100"
+                    onAction="#handleBFSentinelaButtonAction"/>
+                <Button
+                    fx:id="btnFloydWarshall"
+                    text="Floyd-Warshall"
+                    minWidth="100"
+                    onAction="#handleFloydWarshallButtonAction"/>
             </HBox>
         </VBox>
     </bottom>

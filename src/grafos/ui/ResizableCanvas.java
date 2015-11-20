@@ -1,6 +1,5 @@
 package grafos.ui;
 
-import javafx.beans.value.ChangeListener;
 import javafx.scene.canvas.Canvas;
 
 /**
@@ -8,11 +7,8 @@ import javafx.scene.canvas.Canvas;
  */
 public class ResizableCanvas extends Canvas {
 
-    public ResizableCanvas(double width, double height, ChangeListener<Number> listenerSize) {
+    public ResizableCanvas(double width, double height) {
         super(width, height);
-        // Redraw canvas when size changes.
-        //widthProperty().addListener(listenerSize);
-        //heightProperty().addListener(listenerSize);
     }
 
     @Override

@@ -16,20 +16,36 @@ public final class Constants {
     public static final String ALGO_MATRIX_NAME = "Matriz de Adjacência";
     public static final String ALGO_LIST_NAME = "Lista de Adjacência";
 
-    public static final int MODE_CREATE_GRAPH = 0;
-    public static final int MODE_INSERT_ARC = 1;
-    public static final int MODE_REMOVE_ARC = 2;
-    public static final int MODE_FIND_PATH = 3;
-    public static final int MODE_DEPTH_SEARCH = 4;
-    public static final int MODE_DAGMIN = 5;
-    public static final int MODE_DIJKSTRA = 6;
-
     public static final int RESULT_OK = 0;
     public static final int RESULT_UNKNOWN = 1;
     public static final int RESULT_INVALID_VERTEX = 2;
     public static final int RESULT_ARC_ALREADY_EXISTS = 3;
     public static final int RESULT_ARC_NOT_FOUND = 4;
 
+    public static final String MODE_NAME_CREATE_GRAPH = "Criar Grafo";
+    public static final String MODE_NAME_INSERT_ARC = "Inserir arco(s)";
+    public static final String MODE_NAME_REMOVE_ARC = "Remover arco(s)";
+    public static final String MODE_NAME_DEPTH_SEARCH = "Busca por Profundidade (DFS)";
+    public static final String MODE_NAME_FIND_PATH = "Encontrar caminho entre dois vértices (por DFS)";
+    public static final String MODE_NAME_DIJKSTRA = "Dijkstra: Árvore de Menores Caminhos (SPT)";
+    public static final String MODE_NAME_DAGMIN = "DAGmin: Árvore de Menores Caminhos (SPT)";
+    public static final String MODE_NAME_BELLMANFORD = "Bellman-Ford: Árvore de Menores Caminhos (SPT)";
+    public static final String MODE_NAME_BF_SENTINEL = "Bellman-Ford (c/ Sentinela): Árvore de Menores Caminhos (SPT)";
+    public static final String MODE_NAME_FLOYDWARSHALL = "Floyd-Warshall: Tabela de Menores Custos";
+
+    public static final String MODE_INST_CREATE_GRAPH = "Clique em \"Criar Grafo\" e entre o número de vértices do novo grafo.";
+    public static final String MODE_INST_INSERT_ARC = "Clique no vértice inicial do arco e arraste até o vértice final.";
+    // TODO: remove arc instruction
+    public static final String MODE_INST_DEPTH_SEARCH = "A tabela à direita indica os resultados.\n" +
+            "Vértices de mesma cor pertencem a um mesmo componente conexo.\n" +
+            "Os Arcos são coloridos de acordo com sua classificação (ver legenda à direita).";
+    public static final String MODE_INST_FIND_PATH = "Clique no vértice inicial e em seguida clique no vértice final.\n" +
+            "Os arcos que formam o caminho entre os vértices estará em vermelho.";
+    public static final String MODE_INST_SPT = "Clique no vértice inicial.\n" +
+            "A Árvore de Caminhos Mínimos estará em vermelho.\n" +
+            "Os custos mínimos partindo do vértice inicial até cada vértice são indicados pelos números em vermelho ao lado de cada vértice.";
+    public static final String MODE_INST_FLOYDWARSHALL = "A tabela indica o custo mínimo de um vértice para outro.\n" +
+            "(TODO:)Selecionar um vértice para mostrar a SPT partindo dele.";
 
     public static final String ERROR_MSG_UNKNOWN = "Erro desconhecido.";
     public static final String ERROR_MSG_NO_PATH = "Caminho não encontrado.";

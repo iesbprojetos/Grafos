@@ -4,16 +4,12 @@ import static grafos.Constants.*;
 
 import grafos.datatypes.CostSetListener;
 import grafos.datatypes.GraphBase;
-import grafos.datatypes.list.VectorDigraph;
-import grafos.datatypes.list.VectorDigraphLowerCost;
-import grafos.datatypes.list.VectorElement;
-import grafos.datatypes.list.VectorGraph;
+import grafos.datatypes.list.*;
 import grafos.datatypes.matriz.MatrixDigraph;
-import grafos.datatypes.matriz.MatrixDrigraphCost;
+import grafos.datatypes.matriz.MatrixDigraphCost;
 import grafos.datatypes.matriz.MatrixGraph;
+import grafos.datatypes.matriz.MatrixGraphCost;
 import javafx.animation.AnimationTimer;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -22,11 +18,13 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableView;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
@@ -54,11 +52,28 @@ public class DrawingController implements Initializable, CostSetListener {
     private static final int CANVAS_WIDTH = 500;
     private static final int CANVAS_HEIGHT = 500;
 
-    private int mode;
+    private enum Mode {
+        CREATE_GRAPH,
+        INSERT_ARC,
+        REMOVE_ARC,
+        DEPTH_SEARCH,
+        FIND_PATH_DFS,
+        DAGMIN_SPT,
+        DIJKSTRA_SPT,
+        BELLMAN_FORD_SPT,
+        BF_SENTINEL_SPT,
+        FLOYD_WARSHAW
+    }
+
+    private Mode mode;
 
     @FXML
     private BorderPane root;
     private ResizableCanvas canvas;
+    @FXML
+    private Label labelMode;
+    @FXML
+    private Label labelInstruction;
     @FXML
     private Button btnCreate;
     @FXML
@@ -73,6 +88,12 @@ public class DrawingController implements Initializable, CostSetListener {
     private Button btnDAGmin;
     @FXML
     private Button btnDijkstra;
+    @FXML
+    private Button btnBellmanFord2;
+    @FXML
+    private Button btnBellmanFordSentinel;
+    @FXML
+    private Button btnFloydWarshall;
     @FXML
     private TableView<VertexTableRow> tableView;
     @FXML
@@ -109,13 +130,66 @@ public class DrawingController implements Initializable, CostSetListener {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         createCanvas();
-        mode = 0;
+        switchMode(Mode.CREATE_GRAPH);
         selectedVertex = null;
         buttons = new ArrayList<>(
                 Arrays.asList(btnCreate, btnAddArc, btnRemoveArc,
                         btnFindPath, btnDepthSearch, btnDAGmin,
-                        btnDijkstra)
+                        btnDijkstra, btnBellmanFord2, btnBellmanFordSentinel,
+                        btnFloydWarshall)
         );
+    }
+
+    private void switchMode(Mode newMode) {
+        if (newMode != mode) {
+            mode = newMode;
+            selectedVertex = null;
+            path = null;
+
+            switch (newMode) {
+                case CREATE_GRAPH:
+                    labelMode.setText(MODE_NAME_CREATE_GRAPH);
+                    labelInstruction.setText(MODE_INST_CREATE_GRAPH);
+                    break;
+                case INSERT_ARC:
+                    labelMode.setText(MODE_NAME_INSERT_ARC);
+                    labelInstruction.setText(MODE_INST_INSERT_ARC);
+                    break;
+                case REMOVE_ARC:
+                    labelMode.setText(MODE_NAME_REMOVE_ARC);
+                    // TODO: instruction
+                    labelInstruction.setText("");
+                    break;
+                case DEPTH_SEARCH:
+                    labelMode.setText(MODE_NAME_DEPTH_SEARCH);
+                    labelInstruction.setText(MODE_INST_DEPTH_SEARCH);
+                    break;
+                case FIND_PATH_DFS:
+                    labelMode.setText(MODE_NAME_FIND_PATH);
+                    labelInstruction.setText(MODE_INST_FIND_PATH);
+                    break;
+                case DAGMIN_SPT:
+                    labelMode.setText(MODE_NAME_DAGMIN);
+                    labelInstruction.setText(MODE_INST_SPT);
+                    break;
+                case DIJKSTRA_SPT:
+                    labelMode.setText(MODE_NAME_DIJKSTRA);
+                    labelInstruction.setText(MODE_INST_SPT);
+                    break;
+                case BELLMAN_FORD_SPT:
+                    labelMode.setText(MODE_NAME_BELLMANFORD);
+                    labelInstruction.setText(MODE_INST_SPT);
+                    break;
+                case BF_SENTINEL_SPT:
+                    labelMode.setText(MODE_NAME_BF_SENTINEL);
+                    labelMode.setText(MODE_INST_SPT);
+                    break;
+                case FLOYD_WARSHAW:
+                    labelMode.setText(MODE_NAME_FLOYDWARSHALL);
+                    labelInstruction.setText(MODE_INST_FLOYDWARSHALL);
+                    break;
+            }
+        }
     }
 
     public void createGraph(int v) {
@@ -125,10 +199,14 @@ public class DrawingController implements Initializable, CostSetListener {
                     if (costType == COST_NO) {
                         graph = new MatrixDigraph(v);
                     } else if (costType == COST_YES) {
-                        graph = new MatrixDrigraphCost(v);
+                        graph = new MatrixDigraphCost(v);
                     }
                 } else if (graphType == TYPE_GRAPH) {
-                    graph = new MatrixGraph(v);
+                    if (costType == COST_NO) {
+                        graph = new MatrixGraph(v);
+                    } else if (costType == COST_YES) {
+                        graph = new MatrixGraphCost(v);
+                    }
                 }
                 break;
             case ALGO_LIST:
@@ -136,10 +214,14 @@ public class DrawingController implements Initializable, CostSetListener {
                     if (costType == COST_NO) {
                         graph = new VectorDigraph(v);
                     } else if (costType == COST_YES) {
-                        graph = new VectorDigraphLowerCost(v);
+                        graph = new VectorDigraphCost(v);
                     }
                 } else if (graphType == TYPE_GRAPH) {
-                    graph = new VectorGraph(v);
+                    if (costType == COST_NO) {
+                        graph = new VectorGraph(v);
+                    } else if (costType == COST_YES) {
+                        graph = new VectorGraphCost(v);
+                    }
                 }
                 break;
         }
@@ -149,7 +231,7 @@ public class DrawingController implements Initializable, CostSetListener {
         // go to insert arc mode, if graph created
         if (graph != null) {
             selectButton(btnAddArc);
-            mode = MODE_INSERT_ARC;
+            switchMode(Mode.INSERT_ARC);
         }
     }
 
@@ -159,10 +241,10 @@ public class DrawingController implements Initializable, CostSetListener {
         if (cost == 1) {
             result = graph.insertArc(v, w);
         } else {
-            if (graph instanceof MatrixDrigraphCost) {
-                result = ((MatrixDrigraphCost) graph).insertArc(v, w, cost);
-            } else if (graph instanceof VectorDigraphLowerCost) {
-                result = ((VectorDigraphLowerCost) graph).insertArc(v, w, cost);
+            if (graph instanceof MatrixDigraphCost) {
+                result = ((MatrixDigraphCost) graph).insertArc(v, w, cost);
+            } else if (graph instanceof VectorDigraphCost) {
+                result = ((VectorDigraphCost) graph).insertArc(v, w, cost);
             } else {
                 result = RESULT_UNKNOWN;
             }
@@ -185,7 +267,7 @@ public class DrawingController implements Initializable, CostSetListener {
 
             try {
                 FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/res/alert_dialog.fxml"));
-                Parent root = (Parent) fxmlLoader.load();
+                Parent root = fxmlLoader.load();
 
                 AlertDialogController controller = fxmlLoader.getController();
                 controller.setMessage(msg);
@@ -258,7 +340,7 @@ public class DrawingController implements Initializable, CostSetListener {
 
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/res/new_graph.fxml"));
-            Parent root = (Parent) fxmlLoader.load();
+            Parent root = fxmlLoader.load();
 
             NewGraphController controller = fxmlLoader.getController();
             controller.setDrawingController(this);
@@ -274,16 +356,13 @@ public class DrawingController implements Initializable, CostSetListener {
             // TODO:
         }
 
-        mode = MODE_CREATE_GRAPH;
-        selectedVertex = null;
+        switchMode(Mode.CREATE_GRAPH);
     }
 
     @FXML
     protected void handleInsertButtonAction(ActionEvent event) {
         selectButton((Button)event.getSource());
-
-        mode = MODE_INSERT_ARC;
-        selectedVertex = null;
+        switchMode(Mode.INSERT_ARC);
     }
 
     @FXML
@@ -308,16 +387,13 @@ public class DrawingController implements Initializable, CostSetListener {
             // TODO:
         }
 
-        mode = MODE_REMOVE_ARC;
-        selectedVertex = null;
+        switchMode(Mode.REMOVE_ARC);
     }
 
     @FXML
     protected void handleFindPathButtonAction(ActionEvent event) {
         selectButton((Button)event.getSource());
-
-        mode = MODE_FIND_PATH;
-        selectedVertex = null;
+        switchMode(Mode.FIND_PATH_DFS);
     }
 
     @FXML
@@ -355,8 +431,7 @@ public class DrawingController implements Initializable, CostSetListener {
             tableView.setItems(data);
         }
 
-        mode = MODE_DEPTH_SEARCH;
-        selectedVertex = null;
+        switchMode(Mode.DEPTH_SEARCH);
     }
 
     @FXML
@@ -364,9 +439,10 @@ public class DrawingController implements Initializable, CostSetListener {
         // TODO:
         if (graph != null) {
             boolean valid = false;
-            if (graph instanceof MatrixDrigraphCost) {
+
+            if (graph instanceof MatrixDigraphCost) {
                 valid = true;
-            } else if (graph instanceof VectorDigraphLowerCost) {
+            } else if (graph instanceof VectorDigraphCost) {
                 valid = true;
             }
 
@@ -378,8 +454,7 @@ public class DrawingController implements Initializable, CostSetListener {
             // TODO: !!verificar é acíclico!!
 
             selectButton((Button)event.getSource());
-            mode = MODE_DAGMIN;
-            selectedVertex = null;
+            switchMode(Mode.DAGMIN_SPT);
         } else {
             // TOOD: criar grafo primeiro - mostrar msg
         }
@@ -390,11 +465,50 @@ public class DrawingController implements Initializable, CostSetListener {
         // TODO:
         if (graph != null) {
             selectButton((Button) event.getSource());
-
-            mode = MODE_DIJKSTRA;
-            selectedVertex = null;
+            switchMode(Mode.DIJKSTRA_SPT);
         } else {
             // TODO: criar grafo primeiro - mostrar msg
+        }
+    }
+
+    @FXML
+    protected void handleBellmanFord2ButtonAction(ActionEvent event) {
+        if (graph != null) {
+            selectButton((Button)event.getSource());
+            switchMode(Mode.BELLMAN_FORD_SPT);
+        } else {
+            // TODO: criar grafo primeiro - mostrar msg
+        }
+    }
+
+    @FXML
+    protected void handleBFSentinelaButtonAction(ActionEvent event) {
+        if (graph != null) {
+            selectButton((Button)event.getSource());
+            switchMode(Mode.BF_SENTINEL_SPT);
+        } else {
+            // TODO: criar grafo primeiro - mostrar msg
+        }
+    }
+
+    @FXML
+    protected void handleFloydWarshallButtonAction(ActionEvent event) {
+        if (graph != null) {
+            selectButton((Button)event.getSource());
+            switchMode(Mode.FLOYD_WARSHAW);
+
+            try {
+                MatrixDigraphCost costGraph = (MatrixDigraphCost)graph;
+                costGraph.floydWarshaw();
+
+                int[][] cost = costGraph.getCost();
+
+                // mostrar na tela?
+
+            } catch (ClassCastException e) {
+                // TODO: not right type
+                e.printStackTrace();
+            }
         }
     }
 
@@ -417,11 +531,12 @@ public class DrawingController implements Initializable, CostSetListener {
     }
 
     private void createCanvas() {
-        canvas = new ResizableCanvas(CANVAS_WIDTH, CANVAS_HEIGHT, listenerCanvasSize);
+        canvas = new ResizableCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
         canvas.addEventHandler(MouseEvent.ANY, new CanvasClickListener());
 
         StackPane stackPane = new StackPane();
         stackPane.getChildren().add(canvas);
+        stackPane.setAlignment(Pos.CENTER);
 
         canvas.widthProperty().bind(stackPane.widthProperty());
         canvas.heightProperty().bind(stackPane.heightProperty());
@@ -447,6 +562,14 @@ public class DrawingController implements Initializable, CostSetListener {
 
         scaleX = width / CANVAS_WIDTH;
         scaleY = height / CANVAS_HEIGHT;
+
+        if (scaleX > scaleY) {
+            //noinspection SuspiciousNameCombination
+            scaleX = scaleY;
+        } else if (scaleY > scaleX) {
+            //noinspection SuspiciousNameCombination
+            scaleY = scaleX;
+        }
 
         gc.scale(scaleX, scaleY);
 
@@ -518,16 +641,16 @@ public class DrawingController implements Initializable, CostSetListener {
         gc.setStroke(Color.WHITE);
         gc.strokeText(String.valueOf(v), centerX - OFFSET_X, centerY + OFFSET_Y);
 
-        // draw cost, if needed
+        // desenha custo, se necessário
         if (costType == COST_YES) {
             int[] costVector = null;
 
-            if (graph instanceof MatrixDrigraphCost) {
-                MatrixDrigraphCost costGraph = (MatrixDrigraphCost) graph;
-                costVector = costGraph.getCusto();
-            } else if (graph instanceof VectorDigraphLowerCost) {
-                VectorDigraphLowerCost costGraph = (VectorDigraphLowerCost) graph;
-                costVector = costGraph.getCusto();
+            if (graph instanceof MatrixDigraphCost) {
+                MatrixDigraphCost costGraph = (MatrixDigraphCost) graph;
+                costVector = costGraph.getCostFromS();
+            } else if (graph instanceof VectorDigraphCost) {
+                VectorDigraphCost costGraph = (VectorDigraphCost) graph;
+                costVector = costGraph.getCostFromS();
             }
 
             if (costVector != null) {
@@ -551,7 +674,7 @@ public class DrawingController implements Initializable, CostSetListener {
         Point2D end = new Point2D(endX, endY);
 
         int arcType = ARC_TYPE_TREE;
-        if (mode == MODE_DEPTH_SEARCH) {
+        if (mode == Mode.DEPTH_SEARCH) {
             int[] parent = graph.getParent();
             int[] d = graph.getD();
             int[] f = graph.getF();
@@ -570,13 +693,22 @@ public class DrawingController implements Initializable, CostSetListener {
             }
         }
 
-
-        if (mode == MODE_FIND_PATH && path != null) {
+        if (path != null && mode == Mode.FIND_PATH_DFS) {
             int indexStart = path.indexOf(v);
             if (indexStart >= 0 && indexStart + 1 < path.size()) {
                 int nextV = path.get(indexStart + 1);
 
                 if (nextV == w) {
+                    arcType = ARC_TYPE_PATH;
+                }
+            }
+        }
+
+        if (mode == Mode.DIJKSTRA_SPT || mode == Mode.DAGMIN_SPT || mode == Mode.BELLMAN_FORD_SPT ||
+                mode == Mode.BF_SENTINEL_SPT || mode == Mode.FLOYD_WARSHAW) {
+            int[] parent = graph.getParent();
+            if (parent != null) {
+                if (parent[w] == v) {
                     arcType = ARC_TYPE_PATH;
                 }
             }
@@ -621,7 +753,7 @@ public class DrawingController implements Initializable, CostSetListener {
             gc.setLineWidth(3);
             gc.strokeLine(start.getX(), start.getY(), arrowEndX, arrowEndY);
 
-            // cost
+            // desenhar custo do arco, se necessário
             if (costType == COST_YES && arcType != ARC_TYPE_TEMP) {
                 double costX = (end.getX() - start.getX())/2 + start.getX();
                 double costY = (end.getY() - start.getY())/2 + start.getY();
@@ -634,7 +766,7 @@ public class DrawingController implements Initializable, CostSetListener {
                 gc.translate(-costX, -costY);
             }
 
-            // arrow
+            // desenhar seta, se necessário
             if (graphType == TYPE_DIGRAPH) {
                 Image arrow = new Image("/res/arrow_head.png", ARROW_SIZE, ARROW_SIZE, false, true);
 
@@ -667,14 +799,6 @@ public class DrawingController implements Initializable, CostSetListener {
 
         double vertexCenterX = vertexCenterX(v, numV);
 
-        /*
-        double costX = 0;
-
-        if (angle > 0 && angle < 180) {
-            costX =
-        }
-        */
-
         return vertexCenterX + (DIAMETER * Math.cos(Math.toRadians(angle))) - 1;
     }
 
@@ -693,10 +817,33 @@ public class DrawingController implements Initializable, CostSetListener {
 
     public void setCostType(int costType) {
         this.costType = costType;
+
+        switch (costType) {
+            case COST_NO:
+                btnDAGmin.setDisable(true);
+                btnDijkstra.setDisable(true);
+                btnBellmanFord2.setDisable(true);
+                btnFloydWarshall.setDisable(true);
+                btnBellmanFordSentinel.setDisable(true);
+                break;
+            case COST_YES:
+                break;
+        }
     }
 
     public void setAlgoType(int algoType) {
         this.algoType = algoType;
+
+        switch(algoType) {
+            case ALGO_MATRIX:
+                btnBellmanFordSentinel.setDisable(true);
+                break;
+            case ALGO_LIST:
+                btnBellmanFord2.setDisable(true);
+                btnFloydWarshall.setDisable(true);
+                break;
+        }
+
     }
 
     @Override
@@ -704,31 +851,39 @@ public class DrawingController implements Initializable, CostSetListener {
         insertArc(v, w, cost);
     }
 
-    private ChangeListener<Number> listenerCanvasSize = new ChangeListener<Number>() {
-        @Override
-        public void changed(ObservableValue<? extends Number> observableValue, Number number, Number t1) {
-            // drawCanvas();
-        }
-    };
-
     private class CanvasClickListener implements EventHandler<MouseEvent> {
         @Override
         public void handle(MouseEvent mouseEvent) {
             switch (mode) {
-                case MODE_INSERT_ARC:
+                case CREATE_GRAPH:
+                    // do nothing
+                    break;
+                case INSERT_ARC:
                     handleInsertMode(mouseEvent);
                     break;
-                case MODE_REMOVE_ARC:
-                    // TODO:
+                case REMOVE_ARC:
+                    handleRemoveMode(mouseEvent);
                     break;
-                case MODE_FIND_PATH:
+                case DEPTH_SEARCH:
+                    // do nothing
+                    break;
+                case FIND_PATH_DFS:
                     handleFindPath(mouseEvent);
                     break;
-                case MODE_DAGMIN:
+                case DAGMIN_SPT:
                     handleDAGmin(mouseEvent);
                     break;
-                case MODE_DIJKSTRA:
+                case DIJKSTRA_SPT:
                     handleDijkstra(mouseEvent);
+                    break;
+                case BELLMAN_FORD_SPT:
+                    handleBellmanFord2(mouseEvent);
+                    break;
+                case BF_SENTINEL_SPT:
+                    handleBFSentinel(mouseEvent);
+                    break;
+                case FLOYD_WARSHAW:
+                    // do nothing
                     break;
             }
         }
@@ -805,7 +960,7 @@ public class DrawingController implements Initializable, CostSetListener {
             if (mouseEvent.getEventType() == MouseEvent.MOUSE_CLICKED) {
                 if (graph != null) {
                     if (selectedVertex != null) {
-
+                        // TODO:
                     }
                 }
             }
@@ -867,33 +1022,34 @@ public class DrawingController implements Initializable, CostSetListener {
                         if (clickedVertex != null) {
                             selectedVertex = clickedVertex;
 
-                            if (graph instanceof MatrixDrigraphCost) {
-                                // TODO: dagmin:
-                                // ((MatrixDrigraphCost)graph).Dagmin(clickedVertex);
-                            } else if (graph instanceof VectorDigraphLowerCost) {
-                                ((VectorDigraphLowerCost)graph).Dagmin(clickedVertex);
+                            if (graph instanceof MatrixDigraphCost) {
+                                ((MatrixDigraphCost) graph).DAGmin(clickedVertex);
+                            } else if (graph instanceof VectorDigraphCost) {
+                                ((VectorDigraphCost)graph).DAGmin(clickedVertex);
                             } else {
                                 // TODO: invalid
                             }
 
                             fillTable();
-
                             // TODO: update ui?
                             System.out.println("Fim Dijkstra.");
                         }
                     }
                 }
             } catch (ClassCastException e ) {
-                // TODO: não pode usar dijkstra em grafo sem custo - mostrar erro
+                // TODO: não pode usar dijkstra em grafo sem costFromS - mostrar erro
                 e.printStackTrace();
             }
         }
 
         private void handleDijkstra(MouseEvent mouseEvent) {
             try {
-                MatrixDrigraphCost costGraph = (MatrixDrigraphCost)graph;
+                MatrixDigraphCost costGraph = (MatrixDigraphCost)graph;
 
-                // TODO: !!verificar se possui custos negativos!!
+                if (costGraph.hasNegativeCosts()) {
+                    // TODO: show msg
+                    return;
+                }
 
                 double mouseX  = mouseEvent.getX() / scaleX;
                 double mouseY = mouseEvent.getY() / scaleY;
@@ -911,7 +1067,61 @@ public class DrawingController implements Initializable, CostSetListener {
                     }
                 }
             } catch (ClassCastException e ) {
-                // TODO: não pode usar dijkstra em grafo sem custo - mostrar erro
+                // TODO: não pode usar dijkstra em grafo sem costFromS - mostrar erro
+                e.printStackTrace();
+            }
+        }
+
+        private void handleBellmanFord2(MouseEvent mouseEvent) {
+            try {
+                MatrixDigraphCost costGraph = (MatrixDigraphCost)graph;
+
+                // TODO: restrições?
+
+                double mouseX  = mouseEvent.getX() / scaleX;
+                double mouseY = mouseEvent.getY() / scaleY;
+
+                if (mouseEvent.getEventType() == MouseEvent.MOUSE_CLICKED) {
+                    if (graph != null) {
+                        Integer clickedVertex = vertexOnPosition(mouseX, mouseY);
+                        if (clickedVertex != null) {
+                            selectedVertex = clickedVertex;
+                            costGraph.bellmanFord2(clickedVertex);
+
+                            // TODO: needed?
+                            fillTable();
+                        }
+                    }
+                }
+            } catch (ClassCastException e ) {
+                // TODO: não pode usar dijkstra em grafo sem costFromS - mostrar erro
+                e.printStackTrace();
+            }
+        }
+
+        private void handleBFSentinel(MouseEvent mouseEvent) {
+            try {
+                VectorDigraphCost costGraph = (VectorDigraphCost)graph;
+
+                // TODO: restrições?
+
+                double mouseX  = mouseEvent.getX() / scaleX;
+                double mouseY = mouseEvent.getY() / scaleY;
+
+                if (mouseEvent.getEventType() == MouseEvent.MOUSE_CLICKED) {
+                    if (graph != null) {
+                        Integer clickedVertex = vertexOnPosition(mouseX, mouseY);
+                        if (clickedVertex != null) {
+                            selectedVertex = clickedVertex;
+                            costGraph.bellmanFordSentinel(clickedVertex);
+
+                            // TODO: needed?
+                            fillTable();
+                        }
+                    }
+                }
+            } catch (ClassCastException e ) {
+                // TODO: não pode usar dijkstra em grafo sem costFromS - mostrar erro
                 e.printStackTrace();
             }
         }

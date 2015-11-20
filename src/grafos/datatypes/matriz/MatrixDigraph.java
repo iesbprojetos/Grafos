@@ -2,10 +2,7 @@ package grafos.datatypes.matriz;
 
 import static grafos.Constants.*;
 
-import com.sun.deploy.util.ArrayUtil;
 import grafos.datatypes.GraphBase;
-
-import java.util.*;
 
 /**
  * Representa um Digrafo usando o algoritmo Matriz de Adjacência
@@ -129,7 +126,7 @@ public class MatrixDigraph extends GraphBase {
         // percorre os vértices do grafo
         for (int w = 0; w < vertices; w++) {
             // verifica se o vértice w é adjacente ao vértice v
-            if (adjMatrix[v][w] == 1) {
+            if (adjMatrix[v][w] != 0) {
                 // se for, verifica se vértice w já foi visitado
                 if (d[w] == -1) {
                     // vértice w não foi visitado...
@@ -150,7 +147,7 @@ public class MatrixDigraph extends GraphBase {
         // marca o fim da visita ao vértice v
         f[v] = time++;
         // adiciona vértice v ao vetor de ordem topológica
-        topologicalSort[tsCount--] = v;
+        topologicalSort[v] = tsCount--;
 
         return loop;
     }
@@ -184,7 +181,7 @@ public class MatrixDigraph extends GraphBase {
         cc[v] = countCC;
 
         for (int w = 0; w < vertices; w++) {
-            if (adjMatrix[v][w] == 1) {
+            if (adjMatrix[v][w] != 0) {
                 if (cc[w] == -1) {
                     depthSearchCCR(w);
                 }

@@ -72,9 +72,4 @@ public class MatrixGraph extends MatrixDigraph {
             }
         }
     }
-
-    public void dijkstra() {
-        parent = new int[vertices];
-
-    }
 }

@@ -51,7 +51,7 @@ public class MainController {
             }
 
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/res/drawing.fxml"));
-            Parent root = (Parent) fxmlLoader.load();
+            Parent root = fxmlLoader.load();
 
             DrawingController controller = fxmlLoader.getController();
             controller.setGraphType(graphTypeCode);
@@ -60,7 +60,7 @@ public class MainController {
 
             Stage drawingStage = new Stage();
             drawingStage.setTitle(selectedGraphType.getText() + " - " + selectedAlgorithm.getText() + " - " + selectedCost.getText());
-            drawingStage.setScene(new Scene(root, 800, 500));
+            drawingStage.setScene(new Scene(root, 800, 600));
             drawingStage.show();
 
             // close main window
