@@ -58,6 +58,7 @@ public class DrawingController implements Initializable, CostSetListener {
         REMOVE_ARC,
         DEPTH_SEARCH,
         FIND_PATH_DFS,
+        BREADTH_SEARCH,
         DAGMIN_SPT,
         DIJKSTRA_SPT,
         BELLMAN_FORD_SPT,
@@ -81,9 +82,11 @@ public class DrawingController implements Initializable, CostSetListener {
     @FXML
     private Button btnRemoveArc;
     @FXML
+    private Button btnDepthSearch;
+    @FXML
     private Button btnFindPath;
     @FXML
-    private Button btnDepthSearch;
+    private Button btnBreadthSearch;
     @FXML
     private Button btnDAGmin;
     @FXML
@@ -134,9 +137,9 @@ public class DrawingController implements Initializable, CostSetListener {
         selectedVertex = null;
         buttons = new ArrayList<>(
                 Arrays.asList(btnCreate, btnAddArc, btnRemoveArc,
-                        btnFindPath, btnDepthSearch, btnDAGmin,
-                        btnDijkstra, btnBellmanFord2, btnBellmanFordSentinel,
-                        btnFloydWarshall)
+                        btnDepthSearch, btnFindPath, btnBreadthSearch,
+                        btnDAGmin, btnDijkstra, btnBellmanFord2,
+                        btnBellmanFordSentinel, btnFloydWarshall)
         );
     }
 
@@ -157,7 +160,6 @@ public class DrawingController implements Initializable, CostSetListener {
                     break;
                 case REMOVE_ARC:
                     labelMode.setText(MODE_NAME_REMOVE_ARC);
-                    // TODO: instruction
                     labelInstruction.setText("");
                     break;
                 case DEPTH_SEARCH:
@@ -167,6 +169,10 @@ public class DrawingController implements Initializable, CostSetListener {
                 case FIND_PATH_DFS:
                     labelMode.setText(MODE_NAME_FIND_PATH);
                     labelInstruction.setText(MODE_INST_FIND_PATH);
+                    break;
+                case BREADTH_SEARCH:
+                    labelMode.setText(MODE_NAME_BREADTH_SEARCH);
+                    labelInstruction.setText(MODE_INST_BREADTH_SEARCH);
                     break;
                 case DAGMIN_SPT:
                     labelMode.setText(MODE_NAME_DAGMIN);
@@ -391,12 +397,6 @@ public class DrawingController implements Initializable, CostSetListener {
     }
 
     @FXML
-    protected void handleFindPathButtonAction(ActionEvent event) {
-        selectButton((Button)event.getSource());
-        switchMode(Mode.FIND_PATH_DFS);
-    }
-
-    @FXML
     protected void handleDepthSearchButtonAction(ActionEvent event) {
         selectButton((Button)event.getSource());
 
@@ -435,6 +435,18 @@ public class DrawingController implements Initializable, CostSetListener {
     }
 
     @FXML
+    protected void handleFindPathButtonAction(ActionEvent event) {
+        selectButton((Button)event.getSource());
+        switchMode(Mode.FIND_PATH_DFS);
+    }
+
+    @FXML
+    protected void handleBreadthSearchButtonAction(ActionEvent event) {
+        selectButton((Button)event.getSource());
+        switchMode(Mode.BREADTH_SEARCH);
+    }
+
+    @FXML
     protected void handleDAGMinButtonAction(ActionEvent event) {
         // TODO:
         if (graph != null) {
@@ -456,7 +468,7 @@ public class DrawingController implements Initializable, CostSetListener {
             selectButton((Button)event.getSource());
             switchMode(Mode.DAGMIN_SPT);
         } else {
-            // TOOD: criar grafo primeiro - mostrar msg
+            // TODO: criar grafo primeiro - mostrar msg
         }
     }
 
@@ -704,8 +716,8 @@ public class DrawingController implements Initializable, CostSetListener {
             }
         }
 
-        if (mode == Mode.DIJKSTRA_SPT || mode == Mode.DAGMIN_SPT || mode == Mode.BELLMAN_FORD_SPT ||
-                mode == Mode.BF_SENTINEL_SPT || mode == Mode.FLOYD_WARSHAW) {
+        if (mode == Mode.BREADTH_SEARCH || mode == Mode.DIJKSTRA_SPT || mode == Mode.DAGMIN_SPT ||
+                mode == Mode.BELLMAN_FORD_SPT || mode == Mode.BF_SENTINEL_SPT) {
             int[] parent = graph.getParent();
             if (parent != null) {
                 if (parent[w] == v) {
@@ -870,6 +882,9 @@ public class DrawingController implements Initializable, CostSetListener {
                 case FIND_PATH_DFS:
                     handleFindPath(mouseEvent);
                     break;
+                case BREADTH_SEARCH:
+                    handleBreadthSearch(mouseEvent);
+                    break;
                 case DAGMIN_SPT:
                     handleDAGmin(mouseEvent);
                     break;
@@ -1008,6 +1023,27 @@ public class DrawingController implements Initializable, CostSetListener {
                         }
                     }
                 }
+            }
+        }
+
+        private void handleBreadthSearch(MouseEvent mouseEvent) {
+            try {
+                double mouseX  = mouseEvent.getX() / scaleX;
+                double mouseY = mouseEvent.getY() / scaleY;
+
+                if (mouseEvent.getEventType() == MouseEvent.MOUSE_CLICKED) {
+                    if (graph != null) {
+                        Integer clickedVertex = vertexOnPosition(mouseX, mouseY);
+                        if (clickedVertex != null) {
+                            selectedVertex = clickedVertex;
+                            graph.breadthSearch(selectedVertex);
+                            System.out.println("Fim Dijkstra.");
+                        }
+                    }
+                }
+            } catch (ClassCastException e ) {
+                // TODO: não pode usar dijkstra em grafo sem costFromS - mostrar erro
+                e.printStackTrace();
             }
         }
 

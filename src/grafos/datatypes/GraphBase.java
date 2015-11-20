@@ -327,4 +327,6 @@ public abstract class GraphBase {
 
         return cc;
     }
+
+    public abstract void breadthSearch(int s);
 }

@@ -180,4 +180,36 @@ public class VectorDigraph extends GraphBase {
             }
         }
     }
+
+    @Override
+    public void breadthSearch(int s) {
+        label = new int[vertices];
+        countLabel = 0;
+        parent = new int[vertices];
+
+        for (int v = 0; v < vertices; v++) {
+            label[v] = -1;
+            parent[v] = -1;
+        }
+
+        List<Integer> queue = new ArrayList<>();
+
+        label[s] = countLabel++;
+        parent[s] = s;
+        queue.add(s);
+
+        while (queue.size() > 0) {
+            int v = queue.remove(0);
+
+            for (VectorElement adjVertex : adjVector.get(v)) {
+                int w = adjVertex.getW();
+
+                if (label[w] == -1) {
+                    label[w] = countLabel++;
+                    parent[w] = v;
+                    queue.add(w);
+                }
+            }
+        }
+    }
 }

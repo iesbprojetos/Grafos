@@ -27,6 +27,7 @@ public final class Constants {
     public static final String MODE_NAME_REMOVE_ARC = "Remover arco(s)";
     public static final String MODE_NAME_DEPTH_SEARCH = "Busca por Profundidade (DFS)";
     public static final String MODE_NAME_FIND_PATH = "Encontrar caminho entre dois vértices (por DFS)";
+    public static final String MODE_NAME_BREADTH_SEARCH = "Busca por Largura (BFS) - Caminhos Mínimos";
     public static final String MODE_NAME_DIJKSTRA = "Dijkstra: Árvore de Menores Caminhos (SPT)";
     public static final String MODE_NAME_DAGMIN = "DAGmin: Árvore de Menores Caminhos (SPT)";
     public static final String MODE_NAME_BELLMANFORD = "Bellman-Ford: Árvore de Menores Caminhos (SPT)";
@@ -41,6 +42,7 @@ public final class Constants {
             "Os Arcos são coloridos de acordo com sua classificação (ver legenda à direita).";
     public static final String MODE_INST_FIND_PATH = "Clique no vértice inicial e em seguida clique no vértice final.\n" +
             "Os arcos que formam o caminho entre os vértices estará em vermelho.";
+    public static final String MODE_INST_BREADTH_SEARCH = "A árvore de caminhos mínimos está representada pelas arestas em vermelho.";
     public static final String MODE_INST_SPT = "Clique no vértice inicial.\n" +
             "A Árvore de Caminhos Mínimos estará em vermelho.\n" +
             "Os custos mínimos partindo do vértice inicial até cada vértice são indicados pelos números em vermelho ao lado de cada vértice.";

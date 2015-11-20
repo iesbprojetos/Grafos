@@ -4,6 +4,9 @@ import static grafos.Constants.*;
 
 import grafos.datatypes.GraphBase;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Representa um Digrafo usando o algoritmo Matriz de Adjacência
  * Created by dfcarvalho on 8/21/15.
@@ -184,6 +187,38 @@ public class MatrixDigraph extends GraphBase {
             if (adjMatrix[v][w] != 0) {
                 if (cc[w] == -1) {
                     depthSearchCCR(w);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void breadthSearch(int s) {
+        label = new int[vertices];
+        countLabel = 0;
+        parent = new int[vertices];
+
+        for (int v = 0; v < vertices; v++) {
+            label[v] = -1;
+            parent[v] = -1;
+        }
+
+        List<Integer> queue = new ArrayList<>();
+
+        label[s] = countLabel++;
+        parent[s] = s;
+        queue.add(s);
+
+        while (queue.size() > 0) {
+            int v = queue.remove(0);
+
+            for (int w = 0; w < vertices; w++) {
+                if (adjMatrix[v][w] != 0) {
+                    if (label[w] == -1) {
+                        label[w] = countLabel++;
+                        parent[w] = v;
+                        queue.add(w);
+                    }
                 }
             }
         }

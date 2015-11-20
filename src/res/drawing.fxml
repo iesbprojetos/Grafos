@@ -184,9 +184,14 @@
                     onAction="#handleDepthSearchButtonAction"/>
                 <Button
                     fx:id="btnFindPath"
-                    text="Encontrar Caminho"
+                    text="Encontrar Caminho (Profundidade)"
                     minWidth="100"
                     onAction="#handleFindPathButtonAction"/>
+                <Button
+                    fx:id="btnBreadthSearch"
+                    text="Busca por Largura (Caminhos Mínimos)"
+                    minWidth="100"
+                    onAction="#handleBreadthSearchButtonAction"/>
             </HBox>
             <HBox
                 alignment="CENTER_LEFT"
