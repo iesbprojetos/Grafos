@@ -295,7 +295,7 @@ public class VectorDigraphCost extends VectorDigraph {
     	costFromS[v]= 0;
     	franja[v]=v;
     	
-    	while (1) {
+    	while (true) {
     	  int minCost = INF;
     	  for (int w = 0;w < vertices ;w++){
     	      if (parent[w] == -1 && minCost > costFromS[w]){
@@ -313,6 +313,44 @@ public class VectorDigraphCost extends VectorDigraph {
     	          franja[w] = v;}
     	  }
     	}
+    }
+    
+    public void PrimEsparso(){
+    	
+    	franja    = new int [vertices];
+    	costFromS = new int [vertices];
+    	parent    = new int [vertices];
+    	PriorityQueue pq = new PriorityQueue(vertices, INF);
+    	
+    	for(int v = 0; v > vertices; v++){
+    		franja[v] = -1;
+    		parent[v] = -1;
+    	}
+    	int v = 0;
+    	costFromS[v]= 0;
+    	franja[v]= v;
+    	pq.insert(v,0);
+    	
+    	while (!(pq.isEmpty())){
+    	   v = pq.removeHighestPriority();
+    	   parent[v] = franja[v];
+    	   for (VectorElement adjVertex : adjVector.get(v)){
+    	      int w = adjVertex.getW();
+    	        if (parent[w] == -1){ 
+    	           if (franja[w] == -1){
+    	               costFromS[w] = adjVertex.getCost();
+    	               franja[w] = v;
+    	               pq.insert(w, costFromS[w]);}
+    	           else{
+    		           if (costFromS[w] > adjVertex.getCost()){
+    	                   franja[w] = v;
+    	                   costFromS[w] = adjVertex.getCost();
+    	                   pq.setValue(w, costFromS[w]);
+    		           }
+    	           }      
+    	        }
+           }
+    	}   
     }
 
     public int[] getCostFromS() {
