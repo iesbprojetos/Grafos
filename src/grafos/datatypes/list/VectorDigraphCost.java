@@ -11,6 +11,7 @@ public class VectorDigraphCost extends VectorDigraph {
     private static int INF = Integer.MAX_VALUE;
 
     int costFromS[];
+    int franja[];
     
     protected int startVertex;
 
@@ -278,6 +279,40 @@ public class VectorDigraphCost extends VectorDigraph {
                 }
             }
         }
+    }
+    
+    public void PrimDenso(){
+    
+    	franja    = new int [vertices];
+    	costFromS = new int [vertices];
+    	parent    = new int [vertices];
+    	
+    	for(int v = 0; v > vertices; v++){
+    		costFromS[v] = INF;
+    		parent[v]= -1;
+    	}
+    	int v = 0;
+    	costFromS[v]= 0;
+    	franja[v]=v;
+    	
+    	while (1) {
+    	  int minCost = INF;
+    	  for (int w = 0;w < vertices ;w++){
+    	      if (parent[w] == -1 && minCost > costFromS[w]){
+    	    	  minCost = costFromS[w];}
+    	  }
+    	  
+          if (minCost == INF){
+    	    	  break;}
+    	      parent[v] = franja[v];
+    	      
+    	  for (VectorElement adjVertex : adjVector.get(v)){
+    		  int w = adjVertex.getW();
+    	      if ((parent[w] == -1) && (costFromS[w] >adjVertex.getCost())){
+    	          costFromS[w] = adjVertex.getCost();
+    	          franja[w] = v;}
+    	  }
+    	}
     }
 
     public int[] getCostFromS() {
