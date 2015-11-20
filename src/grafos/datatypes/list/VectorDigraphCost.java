@@ -3,12 +3,16 @@ package grafos.datatypes.list;
 import java.util.ArrayList;
 import java.util.List;
 
+import grafos.datatypes.matriz.PriorityQueue;
+
 import static grafos.Constants.*;
 
 public class VectorDigraphCost extends VectorDigraph {
     private static int INF = Integer.MAX_VALUE;
 
     int costFromS[];
+    
+    protected int startVertex;
 
     public VectorDigraphCost(int vertices) {
         super(vertices);
@@ -61,6 +65,39 @@ public class VectorDigraphCost extends VectorDigraph {
             }
         }
     }
+    
+    public void dijkstra(int s) {
+        costFromS = new int[vertices];
+        parent = new int[vertices];
+        startVertex = s;
+
+        for (int v = 0; v < vertices; v++) {
+            costFromS[v] = INF;
+            parent[v] = -1;
+        }
+
+        PriorityQueue pq = new PriorityQueue(vertices, INF);
+        costFromS[s] = 0;
+        parent[s] = s;
+        pq.insert(s, costFromS[s]);
+
+        while (!pq.isEmpty()) {
+            int v = pq.removeHighestPriority();
+            for (VectorElement adjVertex : adjVector.get(v)) {
+            	int w = adjVertex.getW();
+                if (costFromS[w] == INF) {
+                        parent[w] = v;
+                        costFromS[w] = costFromS[v] + adjVertex.getCost();
+                        pq.insert(w, costFromS[w]);
+                    } else if (costFromS[w] > costFromS[v] + adjVertex.getCost()) {
+                        parent[w] = v;
+                        costFromS[w] = costFromS[v] + adjVertex.getCost();
+                        pq.setValue(w, costFromS[w]);
+                    }
+                }
+            }
+        }
+    
 
     public int bellmanFordSentinel(int s) {
         costFromS = new int[vertices];
