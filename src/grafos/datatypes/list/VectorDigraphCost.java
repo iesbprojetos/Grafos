@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import grafos.datatypes.matriz.PriorityQueue;
-import teste.Heap;
-import teste.HeapDijkstra;
 
 import static grafos.Constants.*;
 
@@ -158,61 +156,43 @@ public class VectorDigraphCost extends VectorDigraph {
         // TODO: 1?
         return 1;
     }
-    
-    public class HeapDijkstra {
-        private static Heap heap = new Heap();
-        private static int[][] graph;
 
-        public HeapDijkstra() {
-            graph = new int[6][6];
-            /*
-             * The graph value assignment is just for checking the code. node A is
-             * referred as node 0, node B is referred as node 1 and so on. finally
-             * node F is referred as node 5.
-             */
-            graph[0][0] = graph[0][1] = graph[0][3] = graph[0][4] = graph[0][5] = graph[1][0] = graph[1][1] = graph[1][4] = graph[1][5] = graph[2][2] = graph[2][5] = graph[3][0] = graph[3][3] = graph[4][0] = graph[4][1] = graph[4][4] = graph[5][0] = graph[5][1] = graph[5][2] = graph[5][5] = 0;
-            graph[1][2] = graph[2][1] = graph[2][3] = graph[3][2] = graph[3][4] = graph[4][3] = graph[4][5] = graph[5][4] = 1;
-            graph[1][3] = graph[3][1] = 3;
-            graph[0][2] = graph[2][0] = 4;
-            graph[2][4] = graph[4][2] = 5;
-            graph[3][5] = graph[5][3] = 8;
-        }
+    public int dijkstraHeap(int source) {
+        costFromS = new int[vertices];
+        parent = new int[vertices];
 
-      //  public static void main(String[] args) {
-      //      HeapDijkstra dij = new HeapDijkstra();
-            // Source is node A (node 0) and destination is node F (node 5)
-     //       System.out.println(dij.solve(0, 3, 5));
-     //   }
+        Heap heap = new Heap(vertices);
 
-        public int solve(int numOfNodes, int source, int dest) {
-            heap.push(source, 0);
-            while (!heap.isEmpty()) {
-                int u = heap.pop();
-                if (u == dest)
-                    return heap.cost[dest];
-                for (int i = 0; i < numOfNodes; i++) {
-                    if (graph[u][i] >= 0)
-                        heap.push(i, heap.cost[u] + graph[u][i]);
-                }
+        heap.push(source, 0);
+        while (!heap.isEmpty()) {
+            int v = heap.pop();
+
+            for (VectorElement adjVertex : adjVector.get(v)) {
+                int w = adjVertex.getW();
+                int costW = heap.cost[w] != INF ? heap.cost[w] + adjVertex.getCost() : INF;
+                heap.push(v, costW);
+                costFromS[w] = costW;
+                parent[w] = v;
             }
-            return -1;
         }
+
+        return -1;
     }
 
-    class Heap {
+    private static class Heap {
         private int[] data;
         private int[] index;
         public int[] cost;
         private int size;
 
-        public Heap() {
-            data = new int[6];
-            index = new int[6];
-            cost = new int[6];
+        public Heap(int vertices) {
+            data = new int[vertices];
+            index = new int[vertices];
+            cost = new int[vertices];
 
-            for (int i = 0; i < 6; i++) {
+            for (int i = 0; i < vertices; i++) {
                 index[i] = -1;
-                cost[i] = -1;
+                cost[i] = INF;
             }
 
             size = 0;
@@ -299,8 +279,6 @@ public class VectorDigraphCost extends VectorDigraph {
             }
         }
     }
-
-
 
     public int[] getCostFromS() {
         return costFromS;

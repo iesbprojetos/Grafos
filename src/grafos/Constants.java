@@ -29,6 +29,7 @@ public final class Constants {
     public static final String MODE_NAME_FIND_PATH = "Encontrar caminho entre dois vértices (por DFS)";
     public static final String MODE_NAME_BREADTH_SEARCH = "Busca por Largura (BFS) - Caminhos Mínimos";
     public static final String MODE_NAME_DIJKSTRA = "Dijkstra: Árvore de Menores Caminhos (SPT)";
+    public static final String MODE_NAME_DIJKSTRA_HEAP = "Dijkstra: Árvore de Menores Caminhos (SPT)";
     public static final String MODE_NAME_DAGMIN = "DAGmin: Árvore de Menores Caminhos (SPT)";
     public static final String MODE_NAME_BELLMANFORD = "Bellman-Ford: Árvore de Menores Caminhos (SPT)";
     public static final String MODE_NAME_BF_SENTINEL = "Bellman-Ford (c/ Sentinela): Árvore de Menores Caminhos (SPT)";

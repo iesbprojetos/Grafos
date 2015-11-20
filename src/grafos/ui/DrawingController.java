@@ -61,6 +61,7 @@ public class DrawingController implements Initializable, CostSetListener {
         BREADTH_SEARCH,
         DAGMIN_SPT,
         DIJKSTRA_SPT,
+        DIJKSTRA_HEAP_SPT,
         BELLMAN_FORD_SPT,
         BF_SENTINEL_SPT,
         FLOYD_WARSHAW
@@ -91,6 +92,8 @@ public class DrawingController implements Initializable, CostSetListener {
     private Button btnDAGmin;
     @FXML
     private Button btnDijkstra;
+    @FXML
+    private Button btnDijkstraHeap;
     @FXML
     private Button btnBellmanFord2;
     @FXML
@@ -138,8 +141,8 @@ public class DrawingController implements Initializable, CostSetListener {
         buttons = new ArrayList<>(
                 Arrays.asList(btnCreate, btnAddArc, btnRemoveArc,
                         btnDepthSearch, btnFindPath, btnBreadthSearch,
-                        btnDAGmin, btnDijkstra, btnBellmanFord2,
-                        btnBellmanFordSentinel, btnFloydWarshall)
+                        btnDAGmin, btnDijkstra, btnDijkstraHeap,
+                        btnBellmanFord2, btnBellmanFordSentinel, btnFloydWarshall)
         );
     }
 
@@ -180,6 +183,10 @@ public class DrawingController implements Initializable, CostSetListener {
                     break;
                 case DIJKSTRA_SPT:
                     labelMode.setText(MODE_NAME_DIJKSTRA);
+                    labelInstruction.setText(MODE_INST_SPT);
+                    break;
+                case DIJKSTRA_HEAP_SPT:
+                    labelMode.setText(MODE_NAME_DIJKSTRA_HEAP);
                     labelInstruction.setText(MODE_INST_SPT);
                     break;
                 case BELLMAN_FORD_SPT:
@@ -474,12 +481,19 @@ public class DrawingController implements Initializable, CostSetListener {
 
     @FXML
     protected void handleDijkstraButtonAction(ActionEvent event) {
-        // TODO:
         if (graph != null) {
             selectButton((Button) event.getSource());
             switchMode(Mode.DIJKSTRA_SPT);
         } else {
             // TODO: criar grafo primeiro - mostrar msg
+        }
+    }
+
+    @FXML
+    protected void handleDijkstraHeapButtonAction(ActionEvent event) {
+        if (graph != null) {
+            selectButton((Button)event.getSource());
+            switchMode(Mode.DIJKSTRA_HEAP_SPT);
         }
     }
 
@@ -716,8 +730,8 @@ public class DrawingController implements Initializable, CostSetListener {
             }
         }
 
-        if (mode == Mode.BREADTH_SEARCH || mode == Mode.DIJKSTRA_SPT || mode == Mode.DAGMIN_SPT ||
-                mode == Mode.BELLMAN_FORD_SPT || mode == Mode.BF_SENTINEL_SPT) {
+        if (mode == Mode.BREADTH_SEARCH || mode == Mode.DIJKSTRA_SPT || mode == Mode.DIJKSTRA_HEAP_SPT ||
+                mode == Mode.DAGMIN_SPT || mode == Mode.BELLMAN_FORD_SPT || mode == Mode.BF_SENTINEL_SPT) {
             int[] parent = graph.getParent();
             if (parent != null) {
                 if (parent[w] == v) {
@@ -890,6 +904,9 @@ public class DrawingController implements Initializable, CostSetListener {
                     break;
                 case DIJKSTRA_SPT:
                     handleDijkstra(mouseEvent);
+                    break;
+                case DIJKSTRA_HEAP_SPT:
+                    handleDijkstraHeap(mouseEvent);
                     break;
                 case BELLMAN_FORD_SPT:
                     handleBellmanFord2(mouseEvent);
@@ -1096,6 +1113,33 @@ public class DrawingController implements Initializable, CostSetListener {
                         if (clickedVertex != null) {
                             selectedVertex = clickedVertex;
                             costGraph.dijkstra(clickedVertex);
+
+                            // TODO: update ui?
+                            fillTable();
+                        }
+                    }
+                }
+            } catch (ClassCastException e ) {
+                // TODO: não pode usar dijkstra em grafo sem costFromS - mostrar erro
+                e.printStackTrace();
+            }
+        }
+
+        private void handleDijkstraHeap(MouseEvent mouseEvent) {
+            try {
+                VectorDigraphCost costGraph = (VectorDigraphCost)graph;
+
+                // TODO: checar restrições!!
+
+                double mouseX  = mouseEvent.getX() / scaleX;
+                double mouseY = mouseEvent.getY() / scaleY;
+
+                if (mouseEvent.getEventType() == MouseEvent.MOUSE_CLICKED) {
+                    if (graph != null) {
+                        Integer clickedVertex = vertexOnPosition(mouseX, mouseY);
+                        if (clickedVertex != null) {
+                            selectedVertex = clickedVertex;
+                            costGraph.dijkstraHeap(clickedVertex);
 
                             // TODO: update ui?
                             fillTable();

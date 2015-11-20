@@ -213,6 +213,11 @@
                     minWidth="100"
                     onAction="#handleDijkstraButtonAction"/>
                 <Button
+                    fx:id="btnDijkstraHeap"
+                    text="Dijkstra (Heap)"
+                    minWidth="100"
+                    onAction="#handleDijkstraHeapButtonAction"/>
+                <Button
                     fx:id="btnBellmanFord2"
                     text="Bellman-Ford"
                     minWidth="100"
