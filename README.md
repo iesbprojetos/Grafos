@@ -31,7 +31,7 @@ Instalar plugin e(fx)clipse: http://www.eclipse.org/efxclipse/index.html
 
 ## Funcionalidades ##
 
-* Criar grafos simples (sem loops ou multiplas arestas entre dois vértices)
+* Criar grafos simples (sem loops ou múltiplas arestas entre dois vértices)
 * Buscar caminho entre dois vértices
 * Busca por Profundidade, resultando em:
   * Árvores
@@ -39,3 +39,11 @@ Instalar plugin e(fx)clipse: http://www.eclipse.org/efxclipse/index.html
   * Vetor de pais
   * Vetor de tempo
   * Ordem topológica (quando houver)
+  * Componentes Conexos (e Fortemente Conexos)
+* Busca por Largura (sem custos)
+* Busca em Grafos com Custos / Árvores de Caminhos Mínimos:
+  * Busca em grafos acíclicos (DAGmin)
+  * Dijkstra
+  * Bellman-Ford
+  * Floyd-Warshall
+* Árvore Geradora com Algoritmo de Prim
