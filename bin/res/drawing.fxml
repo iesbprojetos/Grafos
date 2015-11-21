@@ -29,7 +29,7 @@
                 <Insets left="10" top="10" right="10" bottom="10"/>
             </padding>
             <TableView
-                fx:id="tableView"
+                fx:id="tableViewDepth"
                 id="depth-table">
                     <columns>
                         <TableColumn

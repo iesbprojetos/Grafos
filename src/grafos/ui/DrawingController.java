@@ -10,6 +10,8 @@ import grafos.datatypes.matriz.MatrixDigraphCost;
 import grafos.datatypes.matriz.MatrixGraph;
 import grafos.datatypes.matriz.MatrixGraphCost;
 import javafx.animation.AnimationTimer;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -22,19 +24,18 @@ import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.Callback;
 
 import java.io.IOException;
 import java.net.URL;
@@ -64,7 +65,9 @@ public class DrawingController implements Initializable, CostSetListener {
         DIJKSTRA_HEAP_SPT,
         BELLMAN_FORD_SPT,
         BF_SENTINEL_SPT,
-        FLOYD_WARSHAW
+        FLOYD_WARSHAW,
+        PRIM_DENSO,
+        PRIM_ESPARSO
     }
 
     private Mode mode;
@@ -72,6 +75,8 @@ public class DrawingController implements Initializable, CostSetListener {
     @FXML
     private BorderPane root;
     private ResizableCanvas canvas;
+    @FXML
+    private VBox vboxRight;
     @FXML
     private Label labelMode;
     @FXML
@@ -101,7 +106,12 @@ public class DrawingController implements Initializable, CostSetListener {
     @FXML
     private Button btnFloydWarshall;
     @FXML
-    private TableView<VertexTableRow> tableView;
+    private Button btnPrimDenso;
+    @FXML
+    private Button btnPrimEsparso;
+    @FXML
+    private TableView<VertexTableRow> tableViewDepth;
+    private TableView<int[]> tableViewCost;
     @FXML
     private CheckBox cbTree;
     @FXML
@@ -110,6 +120,8 @@ public class DrawingController implements Initializable, CostSetListener {
     private CheckBox cbDescendant;
     @FXML
     private CheckBox cbCross;
+    @FXML
+    private CheckBox cbPath;
 
     private List<Button> buttons = null;
 
@@ -127,6 +139,8 @@ public class DrawingController implements Initializable, CostSetListener {
     private Point2D tempArcEnd;
     private List<Integer> path;
 
+    private int rowNum;
+
     private Color[] vertexColors = new Color[]{
             Color.DARKRED, Color.DARKGREEN, Color.DARKBLUE,
             Color.DARKVIOLET, Color.MEDIUMSPRINGGREEN, Color.BLUE,
@@ -142,12 +156,18 @@ public class DrawingController implements Initializable, CostSetListener {
                 Arrays.asList(btnCreate, btnAddArc, btnRemoveArc,
                         btnDepthSearch, btnFindPath, btnBreadthSearch,
                         btnDAGmin, btnDijkstra, btnDijkstraHeap,
-                        btnBellmanFord2, btnBellmanFordSentinel, btnFloydWarshall)
+                        btnBellmanFord2, btnBellmanFordSentinel, btnFloydWarshall,
+                        btnPrimDenso, btnPrimEsparso)
         );
     }
 
     private void switchMode(Mode newMode) {
         if (newMode != mode) {
+            if (mode == Mode.FLOYD_WARSHAW) {
+                vboxRight.getChildren().remove(0);
+                vboxRight.getChildren().add(0, tableViewDepth);
+            }
+
             mode = newMode;
             selectedVertex = null;
             path = null;
@@ -163,7 +183,7 @@ public class DrawingController implements Initializable, CostSetListener {
                     break;
                 case REMOVE_ARC:
                     labelMode.setText(MODE_NAME_REMOVE_ARC);
-                    labelInstruction.setText("");
+                    labelInstruction.setText(MODE_INST_REMOVE_ARC);
                     break;
                 case DEPTH_SEARCH:
                     labelMode.setText(MODE_NAME_DEPTH_SEARCH);
@@ -195,11 +215,19 @@ public class DrawingController implements Initializable, CostSetListener {
                     break;
                 case BF_SENTINEL_SPT:
                     labelMode.setText(MODE_NAME_BF_SENTINEL);
-                    labelMode.setText(MODE_INST_SPT);
+                    labelInstruction.setText(MODE_INST_SPT);
                     break;
                 case FLOYD_WARSHAW:
                     labelMode.setText(MODE_NAME_FLOYDWARSHALL);
                     labelInstruction.setText(MODE_INST_FLOYDWARSHALL);
+                    break;
+                case PRIM_DENSO:
+                    labelMode.setText(MODE_NAME_PRIM_DENSE);
+                    labelInstruction.setText(MODE_INST_PRIM);
+                    break;
+                case PRIM_ESPARSO:
+                    labelMode.setText(MODE_NAME_PRIM_SPARSE);
+                    labelInstruction.setText(MODE_INST_PRIM);
                     break;
             }
         }
@@ -239,7 +267,8 @@ public class DrawingController implements Initializable, CostSetListener {
                 break;
         }
 
-        tableView.setItems(null);
+        tableViewDepth.setItems(null);
+        // tableViewCost.setItems(null);
 
         // go to insert arc mode, if graph created
         if (graph != null) {
@@ -278,24 +307,7 @@ public class DrawingController implements Initializable, CostSetListener {
                     break;
             }
 
-            try {
-                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/res/alert_dialog.fxml"));
-                Parent root = fxmlLoader.load();
-
-                AlertDialogController controller = fxmlLoader.getController();
-                controller.setMessage(msg);
-
-                Scene scene = new Scene(root);
-
-                Stage dialog = new Stage(StageStyle.UTILITY);
-                dialog.initModality(Modality.WINDOW_MODAL);
-                dialog.setTitle("Alerta");
-                dialog.setScene(scene);
-                dialog.sizeToScene();
-                dialog.show();
-            } catch (IOException e) {
-                // TODO:
-            }
+            showAlertDialog(msg);
         }
     }
 
@@ -314,24 +326,7 @@ public class DrawingController implements Initializable, CostSetListener {
                     break;
             }
 
-            try {
-                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/res/alert_dialog.fxml"));
-                Parent root = (Parent) fxmlLoader.load();
-
-                AlertDialogController controller = fxmlLoader.getController();
-                controller.setMessage(msg);
-
-                Scene scene = new Scene(root);
-
-                Stage dialog = new Stage(StageStyle.UTILITY);
-                dialog.initModality(Modality.WINDOW_MODAL);
-                dialog.setTitle("Alerta");
-                dialog.setScene(scene);
-                dialog.sizeToScene();
-                dialog.show();
-            } catch (IOException e) {
-                // TODO:
-            }
+            showAlertDialog(msg);
         }
     }
 
@@ -350,6 +345,7 @@ public class DrawingController implements Initializable, CostSetListener {
     @FXML
     protected void handleCreateButtonAction(ActionEvent event) {
         selectButton((Button)event.getSource());
+        switchMode(Mode.CREATE_GRAPH);
 
         try {
             FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/res/new_graph.fxml"));
@@ -368,55 +364,53 @@ public class DrawingController implements Initializable, CostSetListener {
         } catch (IOException e) {
             // TODO:
         }
-
-        switchMode(Mode.CREATE_GRAPH);
     }
 
     @FXML
     protected void handleInsertButtonAction(ActionEvent event) {
-        selectButton((Button)event.getSource());
-        switchMode(Mode.INSERT_ARC);
+        if (graph != null) {
+            selectButton((Button) event.getSource());
+            switchMode(Mode.INSERT_ARC);
+        } else {
+            showAlertDialog(ERROR_MSG_NO_GRAPH);
+        }
     }
 
     @FXML
     protected void handleRemoveButtonAction(ActionEvent event) {
-        // TODO: using mouse
-        selectButton((Button)event.getSource());
+        if (graph != null) {
+            selectButton((Button)event.getSource());
+            switchMode(Mode.REMOVE_ARC);
 
-        try {
-            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/res/edit_arc.fxml"));
-            RemoveArcController controller = new RemoveArcController();
-            controller.setDrawingController(this);
-            fxmlLoader.setController(controller);
+            try {
+                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/res/edit_arc.fxml"));
+                RemoveArcController controller = new RemoveArcController();
+                controller.setDrawingController(this);
+                fxmlLoader.setController(controller);
 
-            Parent root = (Parent) fxmlLoader.load();
-            Scene scene = new Scene(root);
-            Stage dialog = new Stage(StageStyle.UTILITY);
-            dialog.setTitle("Remover Arco");
-            dialog.setScene(scene);
-            dialog.sizeToScene();
-            dialog.show();
-        } catch (IOException e) {
-            // TODO:
+                Parent root = fxmlLoader.load();
+                Scene scene = new Scene(root);
+                Stage dialog = new Stage(StageStyle.UTILITY);
+                dialog.setTitle("Remover Arco");
+                dialog.setScene(scene);
+                dialog.sizeToScene();
+                dialog.show();
+            } catch (IOException e) {
+                // TODO:
+                e.printStackTrace();
+            }
+        } else {
+            showAlertDialog(ERROR_MSG_NO_GRAPH);
         }
-
-        switchMode(Mode.REMOVE_ARC);
     }
 
     @FXML
     protected void handleDepthSearchButtonAction(ActionEvent event) {
-        selectButton((Button)event.getSource());
-
         if (graph != null) {
+            selectButton((Button)event.getSource());
+            switchMode(Mode.DEPTH_SEARCH);
 
             boolean acyclic = !graph.depthSearchComplete();
-            if (acyclic) {
-                // TODO: no cycle, show topological sort result
-            } else {
-                // TODO: has cycle, show msg
-            }
-
-            // TODO: fill table view
 
             ObservableList<VertexTableRow> data = FXCollections.observableArrayList();
 
@@ -435,27 +429,34 @@ public class DrawingController implements Initializable, CostSetListener {
                 data.add(row);
             }
 
-            tableView.setItems(data);
+            tableViewDepth.setItems(data);
+        } else {
+            showAlertDialog(ERROR_MSG_NO_GRAPH);
         }
-
-        switchMode(Mode.DEPTH_SEARCH);
     }
 
     @FXML
     protected void handleFindPathButtonAction(ActionEvent event) {
-        selectButton((Button)event.getSource());
-        switchMode(Mode.FIND_PATH_DFS);
+        if (graph != null) {
+            selectButton((Button) event.getSource());
+            switchMode(Mode.FIND_PATH_DFS);
+        } else {
+            showAlertDialog(ERROR_MSG_NO_GRAPH);
+        }
     }
 
     @FXML
     protected void handleBreadthSearchButtonAction(ActionEvent event) {
-        selectButton((Button)event.getSource());
-        switchMode(Mode.BREADTH_SEARCH);
+        if (graph != null) {
+            selectButton((Button)event.getSource());
+            switchMode(Mode.BREADTH_SEARCH);
+        } else {
+            showAlertDialog(ERROR_MSG_NO_GRAPH);
+        }
     }
 
     @FXML
     protected void handleDAGMinButtonAction(ActionEvent event) {
-        // TODO:
         if (graph != null) {
             boolean valid = false;
 
@@ -470,12 +471,10 @@ public class DrawingController implements Initializable, CostSetListener {
                 return;
             }
 
-            // TODO: !!verificar é acíclico!!
-
             selectButton((Button)event.getSource());
             switchMode(Mode.DAGMIN_SPT);
         } else {
-            // TODO: criar grafo primeiro - mostrar msg
+            showAlertDialog(ERROR_MSG_NO_GRAPH);
         }
     }
 
@@ -485,7 +484,7 @@ public class DrawingController implements Initializable, CostSetListener {
             selectButton((Button) event.getSource());
             switchMode(Mode.DIJKSTRA_SPT);
         } else {
-            // TODO: criar grafo primeiro - mostrar msg
+            showAlertDialog(ERROR_MSG_NO_GRAPH);
         }
     }
 
@@ -494,6 +493,8 @@ public class DrawingController implements Initializable, CostSetListener {
         if (graph != null) {
             selectButton((Button)event.getSource());
             switchMode(Mode.DIJKSTRA_HEAP_SPT);
+        } else {
+            showAlertDialog(ERROR_MSG_NO_GRAPH);
         }
     }
 
@@ -503,7 +504,7 @@ public class DrawingController implements Initializable, CostSetListener {
             selectButton((Button)event.getSource());
             switchMode(Mode.BELLMAN_FORD_SPT);
         } else {
-            // TODO: criar grafo primeiro - mostrar msg
+            showAlertDialog(ERROR_MSG_NO_GRAPH);
         }
     }
 
@@ -513,7 +514,7 @@ public class DrawingController implements Initializable, CostSetListener {
             selectButton((Button)event.getSource());
             switchMode(Mode.BF_SENTINEL_SPT);
         } else {
-            // TODO: criar grafo primeiro - mostrar msg
+            showAlertDialog(ERROR_MSG_NO_GRAPH);
         }
     }
 
@@ -529,12 +530,78 @@ public class DrawingController implements Initializable, CostSetListener {
 
                 int[][] cost = costGraph.getCost();
 
-                // mostrar na tela?
+                ObservableList<int[]> data = FXCollections.observableArrayList();
+                data.addAll(Arrays.asList(cost));
 
+                tableViewCost = new TableView<>();
+
+                rowNum = -1*(graph.getVertices()+1);
+
+                // mostrar na tela?
+                for (int c = 0; c < graph.getVertices()+1; c++) {
+                    TableColumn col = new TableColumn<>(c == 0 ? "V" : String.valueOf(c-1));
+                    final int colNum = c;
+                    col.setCellValueFactory(new Callback<TableColumn.CellDataFeatures<int[], Integer>, ObservableValue<Integer>>() {
+                        @Override
+                        public ObservableValue<String> call(TableColumn.CellDataFeatures p) {
+                            if (colNum == 0) {
+                                return new SimpleStringProperty(String.valueOf(rowNum++));
+                            } else {
+                                int cost = ((int[]) p.getValue())[colNum-1];
+                                if (cost == Integer.MAX_VALUE) {
+                                    return new SimpleStringProperty("INF");
+                                } else {
+                                    return new SimpleStringProperty(String.valueOf(cost));
+                                }
+                            }
+                        }
+                    });
+                    tableViewCost.getColumns().add(col);
+                }
+
+                tableViewCost.setItems(data);
+                vboxRight.getChildren().remove(0);
+                vboxRight.getChildren().add(0, tableViewCost);
             } catch (ClassCastException e) {
                 // TODO: not right type
                 e.printStackTrace();
             }
+        } else {
+            showAlertDialog(ERROR_MSG_NO_GRAPH);
+        }
+    }
+
+    @FXML
+    protected void handlePrimDensoButtonAction(ActionEvent event) {
+        if (graph != null) {
+            selectButton((Button)event.getSource());
+            switchMode(Mode.PRIM_DENSO);
+
+            try {
+                VectorDigraphCost costGraph = (VectorDigraphCost)graph;
+                costGraph.primDenso();
+            } catch (ClassCastException e) {
+                // TODO:
+            }
+        } else {
+            showAlertDialog(ERROR_MSG_NO_GRAPH);
+        }
+    }
+
+    @FXML
+    protected void handlePrimEsparsoButtonAction(ActionEvent event) {
+        if (graph != null) {
+            selectButton((Button)event.getSource());
+            switchMode(Mode.PRIM_DENSO);
+
+            try {
+                VectorDigraphCost costGraph = (VectorDigraphCost)graph;
+                costGraph.primEsparso();
+            } catch (ClassCastException e) {
+                // TODO:
+            }
+        } else {
+            showAlertDialog(ERROR_MSG_NO_GRAPH);
         }
     }
 
@@ -553,7 +620,7 @@ public class DrawingController implements Initializable, CostSetListener {
             data.add(row);
         }
 
-        tableView.setItems(data);
+        tableViewDepth.setItems(data);
     }
 
     private void createCanvas() {
@@ -671,7 +738,9 @@ public class DrawingController implements Initializable, CostSetListener {
         gc.strokeText(String.valueOf(v), centerX - OFFSET_X, centerY + OFFSET_Y);
 
         // desenha custo, se necessário
-        if (costType == COST_YES) {
+        if (costType == COST_YES &&
+                (mode == Mode.DAGMIN_SPT || mode == Mode.DIJKSTRA_SPT || mode == Mode.DIJKSTRA_HEAP_SPT ||
+                mode == Mode.BELLMAN_FORD_SPT || mode == Mode.BF_SENTINEL_SPT)) {
             int[] costVector = null;
 
             if (graph instanceof MatrixDigraphCost) {
@@ -744,6 +813,15 @@ public class DrawingController implements Initializable, CostSetListener {
             }
         }
 
+        if (mode == Mode.PRIM_DENSO || mode == Mode.PRIM_ESPARSO) {
+            int[] parent = graph.getParent();
+            if (parent != null) {
+                if (parent[w] == v) {
+                    arcType = ARC_TYPE_PATH;
+                }
+            }
+        }
+
         drawArc(gc, start, end, cost, arcType);
     }
 
@@ -775,6 +853,7 @@ public class DrawingController implements Initializable, CostSetListener {
                 gc.setStroke(Color.GREEN);
                 break;
             case ARC_TYPE_PATH:
+                shouldDraw = cbPath.isSelected();
                 gc.setStroke(Color.RED);
                 break;
         }
@@ -856,6 +935,8 @@ public class DrawingController implements Initializable, CostSetListener {
                 btnBellmanFord2.setDisable(true);
                 btnFloydWarshall.setDisable(true);
                 btnBellmanFordSentinel.setDisable(true);
+                btnPrimDenso.setDisable(true);
+                btnPrimEsparso.setDisable(true);
                 break;
             case COST_YES:
                 break;
@@ -937,15 +1018,15 @@ public class DrawingController implements Initializable, CostSetListener {
                     System.out.println("Clicked Vertex: " + clickedVertex);
                 }
             } else if (mouseEvent.getEventType() == MouseEvent.MOUSE_PRESSED) {
-                Integer clickedVertex = vertexOnPosition(mouseX, mouseY);
-                if (clickedVertex != null) {
-                    if (graph != null) {
+                if (graph != null) {
+                    Integer clickedVertex = vertexOnPosition(mouseX, mouseY);
+                    if (clickedVertex != null) {
                         int numV = graph.getVertices();
                         tempArcStart = new Point2D(vertexCenterX(clickedVertex, numV),
                                 vertexCenterY(clickedVertex, numV));
                         selectedVertex = clickedVertex;
+                        System.out.println("Pressed Vertex: " + clickedVertex);
                     }
-                    System.out.println("Pressed Vertex: " + clickedVertex);
                 }
             } else if (mouseEvent.getEventType() == MouseEvent.MOUSE_DRAGGED) {
                 if (graph != null) {
@@ -997,8 +1078,21 @@ public class DrawingController implements Initializable, CostSetListener {
 
             if (mouseEvent.getEventType() == MouseEvent.MOUSE_CLICKED) {
                 if (graph != null) {
-                    if (selectedVertex != null) {
-                        // TODO:
+                    Integer clickedVertex = vertexOnPosition(mouseX, mouseY);
+                    if (clickedVertex != null) {
+                        if (selectedVertex == null) {
+                            if (clickedVertex != null) {
+                                selectedVertex = clickedVertex;
+                                System.out.println("Clicked Vertex: " + clickedVertex);
+                            }
+                        } else {
+                            int result = graph.removeArc(selectedVertex, clickedVertex);
+                            if (result != RESULT_OK) {
+
+                            }
+
+                            selectedVertex = null;
+                        }
                     }
                 }
             }
@@ -1025,24 +1119,7 @@ public class DrawingController implements Initializable, CostSetListener {
                         selectedVertex = null;
 
                         if (path == null) {
-                            try {
-                                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/res/alert_dialog.fxml"));
-                                Parent root = (Parent) fxmlLoader.load();
-
-                                AlertDialogController controller = fxmlLoader.getController();
-                                controller.setMessage(ERROR_MSG_NO_PATH);
-
-                                Scene scene = new Scene(root);
-
-                                Stage dialog = new Stage(StageStyle.UTILITY);
-                                dialog.initModality(Modality.WINDOW_MODAL);
-                                dialog.setTitle("Alerta");
-                                dialog.setScene(scene);
-                                dialog.sizeToScene();
-                                dialog.show();
-                            } catch (IOException e) {
-                                // TODO:
-                            }
+                            showAlertDialog(ERROR_MSG_NO_PATH);
                         }
                     }
                 }
@@ -1091,32 +1168,12 @@ public class DrawingController implements Initializable, CostSetListener {
                                 // TODO: invalid
                             }
 
-                            if (!success) {
+                            if (success) {
+                                fillTable();
+                            } else {
                                 selectedVertex = null;
-
-                                try {
-                                    FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/res/alert_dialog.fxml"));
-                                    Parent root = fxmlLoader.load();
-
-                                    AlertDialogController controller = fxmlLoader.getController();
-                                    controller.setMessage(ERROR_MSG_DAGMIN_CYCLE);
-
-                                    Scene scene = new Scene(root);
-
-                                    Stage dialog = new Stage(StageStyle.UTILITY);
-                                    dialog.initModality(Modality.WINDOW_MODAL);
-                                    dialog.setTitle("Alerta");
-                                    dialog.setScene(scene);
-                                    dialog.sizeToScene();
-                                    dialog.show();
-                                } catch (IOException e) {
-                                    // TODO:
-                                }
-
-                                return;
+                                showAlertDialog(ERROR_MSG_DAGMIN_CYCLE);
                             }
-
-                            fillTable();
                         }
                     }
                 }
@@ -1264,6 +1321,27 @@ public class DrawingController implements Initializable, CostSetListener {
             }
 
             return null;
+        }
+    }
+
+    private void showAlertDialog(String msg) {
+        try {
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/res/alert_dialog.fxml"));
+            Parent root = fxmlLoader.load();
+
+            AlertDialogController controller = fxmlLoader.getController();
+            controller.setMessage(msg);
+
+            Scene scene = new Scene(root);
+
+            Stage dialog = new Stage(StageStyle.UTILITY);
+            dialog.initModality(Modality.WINDOW_MODAL);
+            dialog.setTitle("Alerta");
+            dialog.setScene(scene);
+            dialog.sizeToScene();
+            dialog.show();
+        } catch (IOException e) {
+            // TODO: error?
         }
     }
 }

@@ -50,6 +50,7 @@
 
     <right>
         <VBox
+            fx:id="vboxRight"
             alignment="TOP_LEFT"
             spacing="15"
             minWidth="300">
@@ -57,7 +58,7 @@
                 <Insets left="10" top="10" right="10" bottom="10"/>
             </padding>
             <TableView
-                fx:id="tableView"
+                fx:id="tableViewDepth"
                 id="depth-table">
                     <columns>
                         <TableColumn
@@ -136,6 +137,15 @@
                         text="Cruzado"
                         selected="true"/>
                 </VBox>
+                <VBox
+                    alignment="TOP_LEFT"
+                    spacing="10">
+                    <CheckBox
+                        id="cbPath"
+                        fx:id="cbPath"
+                        text="Caminho/SPT"
+                        selected="true"/>
+                </VBox>
             </HBox>
         </VBox>
     </right>
@@ -152,7 +162,7 @@
                 </padding>
                 <Label
                     text="Editar Grafo:"
-                    minWidth="200"/>
+                    minWidth="100"/>
                 <Button
                     fx:id="btnCreate"
                     text="Criar Grafo"
@@ -176,11 +186,11 @@
                     <Insets top="10"/>
                 </padding>
                 <Label
-                    text="Busca por Profundidade:"
-                    minWidth="200"/>
+                    text="Sem Custo:"
+                    minWidth="100"/>
                 <Button
                     fx:id="btnDepthSearch"
-                    text="Busca Completa"
+                    text="Busca por Profundidade"
                     minWidth="100"
                     onAction="#handleDepthSearchButtonAction"/>
                 <Button
@@ -201,8 +211,8 @@
                     <Insets top="10"/>
                 </padding>
                 <Label
-                    text="Busca por Largura e&#xA;Árvores de Caminhos Mínimos:"
-                    minWidth="200"/>
+                    text="Com Custo:"
+                    minWidth="100"/>
                 <Button
                     fx:id="btnDAGmin"
                     text="DAGmin"
@@ -233,6 +243,26 @@
                     text="Floyd-Warshall"
                     minWidth="100"
                     onAction="#handleFloydWarshallButtonAction"/>
+            </HBox>
+            <HBox
+                alignment="CENTER_LEFT"
+                spacing="15">
+                <padding>
+                    <Insets top="10"/>
+                </padding>
+                <Label
+                    text="Árvore Geradora:"
+                    minWidth="100"/>
+                <Button
+                    fx:id="btnPrimDenso"
+                    text="Prim (Denso)"
+                    minWidth="100"
+                    onAction="#handlePrimDensoButtonAction"/>
+                <Button
+                    fx:id="btnPrimEsparso"
+                    text="Prim (Esparso)"
+                    minWidth="100"
+                    onAction="#handlePrimEsparsoButtonAction"/>
             </HBox>
         </VBox>
     </bottom>

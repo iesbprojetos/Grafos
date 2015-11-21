@@ -62,3 +62,7 @@ root {
 #cbCross {
     -fx-text-fill: blue;
 }
+
+#cbPath {
+    -fx-text-fill: red;
+}

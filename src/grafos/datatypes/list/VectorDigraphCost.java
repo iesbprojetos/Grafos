@@ -12,7 +12,7 @@ public class VectorDigraphCost extends VectorDigraph {
 
     int costFromS[];
     int franja[];
-    
+
     protected int startVertex;
 
     /**
@@ -97,7 +97,7 @@ public class VectorDigraphCost extends VectorDigraph {
 
         return true;
     }
-    
+
     public void dijkstra(int s) {
         costFromS = new int[vertices];
         parent = new int[vertices];
@@ -116,20 +116,20 @@ public class VectorDigraphCost extends VectorDigraph {
         while (!pq.isEmpty()) {
             int v = pq.removeHighestPriority();
             for (VectorElement adjVertex : adjVector.get(v)) {
-            	int w = adjVertex.getW();
+                int w = adjVertex.getW();
                 if (costFromS[w] == INF) {
-                        parent[w] = v;
-                        costFromS[w] = costFromS[v] + adjVertex.getCost();
-                        pq.insert(w, costFromS[w]);
-                    } else if (costFromS[w] > costFromS[v] + adjVertex.getCost()) {
-                        parent[w] = v;
-                        costFromS[w] = costFromS[v] + adjVertex.getCost();
-                        pq.setValue(w, costFromS[w]);
-                    }
+                    parent[w] = v;
+                    costFromS[w] = costFromS[v] + adjVertex.getCost();
+                    pq.insert(w, costFromS[w]);
+                } else if (costFromS[w] > costFromS[v] + adjVertex.getCost()) {
+                    parent[w] = v;
+                    costFromS[w] = costFromS[v] + adjVertex.getCost();
+                    pq.setValue(w, costFromS[w]);
                 }
             }
         }
-    
+    }
+
 
     public int bellmanFordSentinel(int s) {
         costFromS = new int[vertices];
@@ -311,77 +311,83 @@ public class VectorDigraphCost extends VectorDigraph {
             }
         }
     }
-    
-    public void PrimDenso(){
-    
-    	franja    = new int [vertices];
-    	costFromS = new int [vertices];
-    	parent    = new int [vertices];
-    	
-    	for(int v = 0; v > vertices; v++){
-    		costFromS[v] = INF;
-    		parent[v]= -1;
-    	}
-    	int v = 0;
-    	costFromS[v]= 0;
-    	franja[v]=v;
-    	
-    	while (true) {
-    	  int minCost = INF;
-    	  for (int w = 0;w < vertices ;w++){
-    	      if (parent[w] == -1 && minCost > costFromS[w]){
-    	    	  minCost = costFromS[w];}
-    	  }
-    	  
-          if (minCost == INF){
-    	    	  break;}
-    	      parent[v] = franja[v];
-    	      
-    	  for (VectorElement adjVertex : adjVector.get(v)){
-    		  int w = adjVertex.getW();
-    	      if ((parent[w] == -1) && (costFromS[w] >adjVertex.getCost())){
-    	          costFromS[w] = adjVertex.getCost();
-    	          franja[w] = v;}
-    	  }
-    	}
+
+    public void primDenso() {
+        franja = new int[vertices];
+        costFromS = new int[vertices];
+        parent = new int[vertices];
+
+        for (int v = 0; v < vertices; v++) {
+            costFromS[v] = INF;
+            parent[v] = -1;
+            franja[v] = -1;
+        }
+
+        int v = 0;
+        costFromS[v] = 0;
+        franja[v] = v;
+
+        while (true) {
+            int minCost = INF;
+
+            for (int w = 0; w < vertices; w++) {
+                if (parent[w] == -1 && minCost > costFromS[w]) {
+                    minCost = costFromS[v=w];
+                }
+            }
+
+            if (minCost == INF) {
+                break;
+            }
+
+            parent[v] = franja[v];
+
+            for (VectorElement adjVertex : adjVector.get(v)) {
+                int w = adjVertex.getW();
+                if ((parent[w] == -1) && (costFromS[w] > adjVertex.getCost())) {
+                    costFromS[w] = adjVertex.getCost();
+                    franja[w] = v;
+                }
+            }
+        }
     }
-    
-    public void PrimEsparso(){
-    	
-    	franja    = new int [vertices];
-    	costFromS = new int [vertices];
-    	parent    = new int [vertices];
-    	PriorityQueue pq = new PriorityQueue(vertices, INF);
-    	
-    	for(int v = 0; v > vertices; v++){
-    		franja[v] = -1;
-    		parent[v] = -1;
-    	}
-    	int v = 0;
-    	costFromS[v]= 0;
-    	franja[v]= v;
-    	pq.insert(v,0);
-    	
-    	while (!(pq.isEmpty())){
-    	   v = pq.removeHighestPriority();
-    	   parent[v] = franja[v];
-    	   for (VectorElement adjVertex : adjVector.get(v)){
-    	      int w = adjVertex.getW();
-    	        if (parent[w] == -1){ 
-    	           if (franja[w] == -1){
-    	               costFromS[w] = adjVertex.getCost();
-    	               franja[w] = v;
-    	               pq.insert(w, costFromS[w]);}
-    	           else{
-    		           if (costFromS[w] > adjVertex.getCost()){
-    	                   franja[w] = v;
-    	                   costFromS[w] = adjVertex.getCost();
-    	                   pq.setValue(w, costFromS[w]);
-    		           }
-    	           }      
-    	        }
-           }
-    	}   
+
+    public void primEsparso() {
+        franja = new int[vertices];
+        costFromS = new int[vertices];
+        parent = new int[vertices];
+        PriorityQueue pq = new PriorityQueue(vertices, INF);
+
+        for (int v = 0; v < vertices; v++) {
+            franja[v] = -1;
+            parent[v] = -1;
+        }
+
+        int v = 0;
+        costFromS[v] = 0;
+        franja[v] = v;
+        pq.insert(v, 0);
+
+        while (!pq.isEmpty()) {
+            v = pq.removeHighestPriority();
+            parent[v] = franja[v];
+            for (VectorElement adjVertex : adjVector.get(v)) {
+                int w = adjVertex.getW();
+                if (parent[w] == -1) {
+                    if (franja[w] == -1) {
+                        costFromS[w] = adjVertex.getCost();
+                        franja[w] = v;
+                        pq.insert(w, costFromS[w]);
+                    } else {
+                        if (costFromS[w] > adjVertex.getCost()) {
+                            franja[w] = v;
+                            costFromS[w] = adjVertex.getCost();
+                            pq.setValue(w, costFromS[w]);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     public int[] getCostFromS() {
