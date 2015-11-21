@@ -381,24 +381,6 @@ public class DrawingController implements Initializable, CostSetListener {
         if (graph != null) {
             selectButton((Button)event.getSource());
             switchMode(Mode.REMOVE_ARC);
-
-            try {
-                FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/res/edit_arc.fxml"));
-                RemoveArcController controller = new RemoveArcController();
-                controller.setDrawingController(this);
-                fxmlLoader.setController(controller);
-
-                Parent root = fxmlLoader.load();
-                Scene scene = new Scene(root);
-                Stage dialog = new Stage(StageStyle.UTILITY);
-                dialog.setTitle("Remover Arco");
-                dialog.setScene(scene);
-                dialog.sizeToScene();
-                dialog.show();
-            } catch (IOException e) {
-                // TODO:
-                e.printStackTrace();
-            }
         } else {
             showAlertDialog(ERROR_MSG_NO_GRAPH);
         }
@@ -757,7 +739,8 @@ public class DrawingController implements Initializable, CostSetListener {
                 double costY = costCenterY(v, numV);
 
                 gc.setStroke(Color.RED);
-                gc.strokeText(String.valueOf(cost), costX, costY);
+                String strCost = cost != Integer.MAX_VALUE ? String.valueOf(cost) : "INF";
+                gc.strokeText(strCost, costX, costY);
             }
         }
     }
@@ -1087,8 +1070,8 @@ public class DrawingController implements Initializable, CostSetListener {
                             }
                         } else {
                             int result = graph.removeArc(selectedVertex, clickedVertex);
-                            if (result != RESULT_OK) {
-
+                            if (result == RESULT_ARC_NOT_FOUND) {
+                                showAlertDialog(ERROR_MSG_ARC_NOT_FOUND);
                             }
 
                             selectedVertex = null;

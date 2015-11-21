@@ -189,26 +189,32 @@ public class VectorDigraphCost extends VectorDigraph {
         return 1;
     }
 
-    public int dijkstraHeap(int source) {
+    public void dijkstraHeap(int s) {
         costFromS = new int[vertices];
         parent = new int[vertices];
 
+        for (int v = 0; v < vertices; v++) {
+            costFromS[v] = INF;
+            parent[v] = -1;
+        }
+
+        costFromS[s] = 0;
+        parent[s] = s;
+
         Heap heap = new Heap(vertices);
 
-        heap.push(source, 0);
+        heap.push(s, 0);
         while (!heap.isEmpty()) {
             int v = heap.pop();
 
             for (VectorElement adjVertex : adjVector.get(v)) {
                 int w = adjVertex.getW();
                 int costW = heap.cost[w] != INF ? heap.cost[w] + adjVertex.getCost() : INF;
-                heap.push(v, costW);
                 costFromS[w] = costW;
                 parent[w] = v;
+                heap.push(w, costW);
             }
         }
-
-        return -1;
     }
 
     private static class Heap {

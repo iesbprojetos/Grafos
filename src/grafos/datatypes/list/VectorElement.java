@@ -19,4 +19,20 @@ public class VectorElement {
     public int getCost() {
         return cost;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        VectorElement that = (VectorElement) o;
+
+        return w == that.w;
+
+    }
+
+    @Override
+    public int hashCode() {
+        return w;
+    }
 }
